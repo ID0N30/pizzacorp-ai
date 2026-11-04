@@ -12,6 +12,10 @@ export interface BICopilotContext {
   byChannel: Record<string, { orders: number; qty: number; revenue: number }>;
   byCategory: Record<string, { qty: number; revenue: number }>;
   bySize: Record<string, { qty: number; revenue: number }>;
+  byYear: Record<string, { orders: number; qty: number; revenue: number }>;
+  byMonth: Record<string, { orders: number; qty: number; revenue: number }>;
+  byYearMonth: Record<string, { orders: number; qty: number; revenue: number }>;
+  byDayOfWeek: Record<string, { orders: number; qty: number; revenue: number }>;
   topPizzas: Array<{ pizza_id: string; name: string; size: string; qty: number; revenue: number }>;
   bottomPizzas: Array<{ pizza_id: string; name: string; size: string; qty: number; revenue: number }>;
   recentLiveRows: FactVentaRow[];
@@ -29,9 +33,14 @@ function buildContextSummaryText(ctx: BICopilotContext): string {
     .join(' | ');
 
   return `- Total filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalHistoricalRows.toLocaleString()} históricas + ${ctx.liveOrdersCount} nuevas hoy)
+- Rango de Fechas Históricas en dim_fecha: desde ${(rawModelData.summary as any).minDateIso || '2024-01-01'} hasta ${(rawModelData.summary as any).maxDateIso || '2025-12-31'} (+ órdenes en vivo en 2026)
 - Ingresos Totales Acumulados: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD (Nuevas hoy: $${ctx.liveRevenue.toFixed(2)} USD)
 - Total Unidades Vendidas: ${ctx.totalQuantity.toLocaleString()} pizzas
 - Ticket Promedio por Transacción: $${(ctx.totalRevenue / Math.max(1, ctx.totalHistoricalRows + ctx.liveOrdersCount)).toFixed(2)} USD
+- Ventas y Ganancias por AÑO (dim_fecha × fact_ventas): ${JSON.stringify(ctx.byYear)}
+- Ventas por MES (dim_fecha): ${JSON.stringify(ctx.byMonth)}
+- Ventas detalladas por AÑO-MES (dim_fecha): ${JSON.stringify(ctx.byYearMonth)}
+- Ventas por DÍA DE LA SEMANA (dim_fecha): ${JSON.stringify(ctx.byDayOfWeek)}
 - Ventas por Ciudad (dim_city): ${JSON.stringify(ctx.byCity)}
 - Ventas por Canal (dim_saleChannel): ${JSON.stringify(ctx.byChannel)}
 - Ventas por Categoría (dim_pizaTipeID): ${JSON.stringify(ctx.byCategory)}
@@ -51,12 +60,47 @@ export function buildLocalFallbackAnswer(question: string, ctx: BICopilotContext
   const channelsSorted = Object.entries(ctx.byChannel).sort((a, b) => b[1].revenue - a[1].revenue);
   const categoriesSorted = Object.entries(ctx.byCategory).sort((a, b) => b[1].revenue - a[1].revenue);
   const sizesSorted = Object.entries(ctx.bySize).sort((a, b) => b[1].revenue - a[1].revenue);
+  const yearsSorted = Object.entries(ctx.byYear || {}).sort((a, b) => a[0].localeCompare(b[0]));
+  const monthsSorted = Object.entries(ctx.byMonth || {}).sort((a, b) => b[1].revenue - a[1].revenue);
+  const daysSorted = Object.entries(ctx.byDayOfWeek || {}).sort((a, b) => b[1].revenue - a[1].revenue);
 
   const topCity = citiesSorted[0];
   const lowCity = citiesSorted[citiesSorted.length - 1];
   const topChannel = channelsSorted[0];
   const topPizza = ctx.topPizzas[0];
   const worstPizza = ctx.bottomPizzas[0];
+
+  if (
+    q.includes('ano') ||
+    q.includes('anio') ||
+    q.includes('anual') ||
+    q.includes('2024') ||
+    q.includes('2025') ||
+    q.includes('2026') ||
+    q.includes('fecha') ||
+    q.includes('mes') ||
+    q.includes('semana') ||
+    q.includes('tiempo')
+  ) {
+    const yearLines = yearsSorted
+      .map(
+        ([yr, v]) =>
+          `• Año ${yr}: $${v.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD (${v.orders.toLocaleString()} filas / ${v.qty.toLocaleString()} pizzas — ${((v.revenue / ctx.totalRevenue) * 100).toFixed(1)}% del total)`
+      )
+      .join('\n');
+
+    const topMonth = monthsSorted[0];
+    const topDay = daysSorted[0];
+    const growth =
+      ctx.byYear['2024'] && ctx.byYear['2025']
+        ? (((ctx.byYear['2025'].revenue - ctx.byYear['2024'].revenue) / ctx.byYear['2024'].revenue) * 100).toFixed(1)
+        : null;
+
+    return {
+      answer: `Análisis Temporal de Ventas y Ganancias (dim_fecha × fact_ventas):\n${yearLines}\n\n• Mes con mayores ventas: ${topMonth ? `${topMonth[0]} ($${topMonth[1].revenue.toLocaleString('en-US')})` : 'N/A'}\n• Día de la semana más fuerte: ${topDay ? `${topDay[0]} ($${topDay[1].revenue.toLocaleString('en-US')})` : 'N/A'}${growth ? `\n• Crecimiento interanual (2024 → 2025): +${growth}%` : ''}`,
+      spokenSummary: `En 2024 los ingresos fueron de ${Math.round(ctx.byYear['2024']?.revenue || 0).toLocaleString('es-CO')} dólares y en 2025 subieron a ${Math.round(ctx.byYear['2025']?.revenue || 0).toLocaleString('es-CO')} dólares.`
+    };
+  }
 
   if (q.includes('ingrediente') || q.includes('que lleva') || q.includes('que trae') || q.includes('receta')) {
     const types = rawModelData.pizzaTypes || [];
@@ -150,7 +194,7 @@ export function buildLocalFallbackAnswer(question: string, ctx: BICopilotContext
   }
 
   return {
-    answer: `Resumen Ejecutivo del Modelo de Datos (Excel):\n• Ingresos Totales: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD\n• Filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalQuantity.toLocaleString()} pizzas)\n• Ciudad Líder: ${topCity[0]} ($${topCity[1].revenue.toLocaleString('en-US')})\n• Canal Principal: ${topChannel[0]} ($${topChannel[1].revenue.toLocaleString('en-US')})\n• Pizza #1: ${topPizza.name} (${topPizza.size}) — $${topPizza.revenue.toLocaleString('en-US')}`,
+    answer: `Resumen Ejecutivo del Modelo de Datos (Excel):\n• Ingresos Totales: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD\n• Por Año: 2024 ($${(ctx.byYear['2024']?.revenue || 0).toLocaleString('en-US')}) | 2025 ($${(ctx.byYear['2025']?.revenue || 0).toLocaleString('en-US')})\n• Filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalQuantity.toLocaleString()} pizzas)\n• Ciudad Líder: ${topCity[0]} ($${topCity[1].revenue.toLocaleString('en-US')})\n• Canal Principal: ${topChannel[0]} ($${topChannel[1].revenue.toLocaleString('en-US')})\n• Pizza #1: ${topPizza.name} (${topPizza.size}) — $${topPizza.revenue.toLocaleString('en-US')}`,
     spokenSummary: `El modelo registra ingresos totales por ${Math.round(ctx.totalRevenue).toLocaleString('es-CO')} dólares en ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString('es-CO')} filas, liderado por la ciudad de ${topCity[0]}.`
   };
 }
@@ -164,6 +208,7 @@ export async function askBICopilot(
 
   if (keys.length > 0) {
     const prompt = `Eres el Analista Ejecutivo IA de PizzaCorp conectado directamente al modelo dimensional en Excel / Google Sheets (fact_ventas, dim_pizzas, dim_pizaTipeID, dim_city, dim_saleChannel, dim_fecha).
+Tienes acceso COMPLETO a las fechas, años (2024, 2025 y 2026), meses y días de la semana a través de la tabla dim_fecha.
 Datos exactos en tiempo real:
 ${buildContextSummaryText(ctx)}
 
@@ -171,7 +216,7 @@ Pregunta del administrador: "${question}"
 
 Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 {
-  "answer": "Respuesta ejecutiva bien formateada con cifras o ingredientes exactos del modelo y una recomendación breve.",
+  "answer": "Respuesta ejecutiva bien formateada con cifras exactas (años, meses, ciudades, canales o ingredientes) y una recomendación breve.",
   "spokenSummary": "Resumen hablado natural de máximo 2 oraciones breves en español (sin símbolos ni listas) para leer en voz alta rápidamente."
 }`;
 
@@ -233,11 +278,11 @@ export async function askBICopilotByAudio(
   const keys = getDualApiKeys(apiKey, false);
   if (keys.length === 0) return null;
 
-  const prompt = `Escucha el audio del administrador preguntando sobre el negocio de pizzas, ventas, ciudades, canales o ingredientes del modelo en Excel.
+  const prompt = `Escucha el audio del administrador preguntando sobre el negocio de pizzas, ventas por año/mes/día (dim_fecha), ciudades, canales o ingredientes del modelo en Excel.
 Si el audio solo tiene silencio o ruido sin palabras, devuelve:
 {"userQuestion": "", "answer": "", "spokenSummary": ""}
 
-Datos exactos del modelo estrella:
+Datos exactos del modelo estrella (incluyendo años 2024, 2025, meses y días de dim_fecha):
 ${buildContextSummaryText(ctx)}
 
 Devuelve ÚNICAMENTE un objeto JSON válido con:

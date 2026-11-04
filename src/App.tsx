@@ -149,6 +149,10 @@ export function App() {
     const byChannel = JSON.parse(JSON.stringify(rawModelData.analytics.byChannel));
     const byCategory = JSON.parse(JSON.stringify(rawModelData.analytics.byCategory));
     const bySize = JSON.parse(JSON.stringify(rawModelData.analytics.bySize));
+    const byYear = JSON.parse(JSON.stringify((rawModelData.analytics as any).byYear || {}));
+    const byMonth = JSON.parse(JSON.stringify((rawModelData.analytics as any).byMonth || {}));
+    const byYearMonth = JSON.parse(JSON.stringify((rawModelData.analytics as any).byYearMonth || {}));
+    const byDayOfWeek = JSON.parse(JSON.stringify((rawModelData.analytics as any).byDayOfWeek || {}));
     const topPizzas = JSON.parse(JSON.stringify(rawModelData.analytics.topPizzas));
     const bottomPizzas = JSON.parse(JSON.stringify(rawModelData.analytics.bottomPizzas));
 
@@ -172,6 +176,13 @@ export function App() {
       if (!bySize[row.size]) bySize[row.size] = { qty: 0, revenue: 0 };
       bySize[row.size].qty += row.quantity;
       bySize[row.size].revenue = Number((bySize[row.size].revenue + row.total_price).toFixed(2));
+
+      const jsDate = new Date((row.date - 25569) * 86400 * 1000);
+      const yr = String(jsDate.getUTCFullYear() || 2026);
+      if (!byYear[yr]) byYear[yr] = { orders: 0, qty: 0, revenue: 0 };
+      byYear[yr].orders += 1;
+      byYear[yr].qty += row.quantity;
+      byYear[yr].revenue = Number((byYear[yr].revenue + row.total_price).toFixed(2));
     }
 
     return {
@@ -184,6 +195,10 @@ export function App() {
       byChannel,
       byCategory,
       bySize,
+      byYear,
+      byMonth,
+      byYearMonth,
+      byDayOfWeek,
       topPizzas,
       bottomPizzas,
       recentLiveRows: liveRows
@@ -945,6 +960,30 @@ export function App() {
               {biViewMode === 'mirror' && (
                 <div className="space-y-5">
                   <div>
+                    <h4 className="text-xs font-bold text-slate-700 mb-2">
+                      Ganancias por Año (dim_fecha)
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {Object.entries(liveAnalytics.byYear)
+                        .sort((a, b) => a[0].localeCompare(b[0]))
+                        .map(([yr, st]) => (
+                          <div
+                            key={yr}
+                            className="bg-blue-50/50 p-3 rounded-xl border border-blue-200/70 text-xs"
+                          >
+                            <div className="text-[11px] font-bold text-blue-700">Año {yr}</div>
+                            <div className="text-sm font-extrabold text-slate-900 mt-0.5">
+                              ${st.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">
+                              {st.orders.toLocaleString()} filas • {st.qty.toLocaleString()} uds
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  <div>
                     <h4 className="text-xs font-bold text-slate-700 mb-2.5">
                       Facturación por Ciudad (dim_city)
                     </h4>
@@ -1203,6 +1242,7 @@ export function App() {
               {/* PREGUNTAS RÁPIDAS SUGERIDAS */}
               <div className="flex gap-1.5 overflow-x-auto py-2.5 border-b border-slate-100">
                 {[
+                  'Ganancias por año',
                   '¿Qué ciudad vende más?',
                   'Top 5 pizzas más vendidas',
                   '¿Qué ingredientes lleva la Hawaiana?',

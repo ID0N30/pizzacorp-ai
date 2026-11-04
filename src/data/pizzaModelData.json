@@ -4,6 +4,8 @@
     "rawSheetRows": 56864,
     "lastOrderId": 24957,
     "lastExcelDate": 45657,
+    "minDateIso": "2024-01-01",
+    "maxDateIso": "2025-12-31",
     "totalQuantity": 57977,
     "totalRevenue": 730010.8
   },
@@ -1289,6 +1291,239 @@
       "XXL": {
         "qty": 32,
         "revenue": 1150.4
+      }
+    },
+    "byYear": {
+      "2024": {
+        "orders": 8237,
+        "qty": 8396,
+        "revenue": 105513.35
+      },
+      "2025": {
+        "orders": 48627,
+        "qty": 49581,
+        "revenue": 624497.45
+      }
+    },
+    "byMonth": {
+      "enero": {
+        "orders": 4816,
+        "qty": 4903,
+        "revenue": 61541.5
+      },
+      "febrero": {
+        "orders": 4629,
+        "qty": 4710,
+        "revenue": 58875.2
+      },
+      "marzo": {
+        "orders": 4808,
+        "qty": 4893,
+        "revenue": 62419.7
+      },
+      "abril": {
+        "orders": 4829,
+        "qty": 4932,
+        "revenue": 62211.75
+      },
+      "mayo": {
+        "orders": 5047,
+        "qty": 5149,
+        "revenue": 65576.85
+      },
+      "junio": {
+        "orders": 4612,
+        "qty": 4703,
+        "revenue": 59495.35
+      },
+      "julio": {
+        "orders": 5038,
+        "qty": 5145,
+        "revenue": 64763.95
+      },
+      "agosto": {
+        "orders": 4694,
+        "qty": 4782,
+        "revenue": 59748.25
+      },
+      "septiembre": {
+        "orders": 4546,
+        "qty": 4628,
+        "revenue": 58088.5
+      },
+      "octubre": {
+        "orders": 4459,
+        "qty": 4562,
+        "revenue": 56457.05
+      },
+      "noviembre": {
+        "orders": 4960,
+        "qty": 5061,
+        "revenue": 63759.35
+      },
+      "diciembre": {
+        "orders": 4426,
+        "qty": 4509,
+        "revenue": 57073.35
+      }
+    },
+    "byYearMonth": {
+      "2024-01 (enero 2024)": {
+        "orders": 660,
+        "qty": 671,
+        "revenue": 8471.1
+      },
+      "2024-02 (febrero 2024)": {
+        "orders": 737,
+        "qty": 749,
+        "revenue": 8980.05
+      },
+      "2024-03 (marzo 2024)": {
+        "orders": 622,
+        "qty": 632,
+        "revenue": 8246.9
+      },
+      "2024-04 (abril 2024)": {
+        "orders": 762,
+        "qty": 781,
+        "revenue": 9988.6
+      },
+      "2024-05 (mayo 2024)": {
+        "orders": 808,
+        "qty": 821,
+        "revenue": 10622.5
+      },
+      "2024-06 (junio 2024)": {
+        "orders": 587,
+        "qty": 596,
+        "revenue": 7752.25
+      },
+      "2024-07 (julio 2024)": {
+        "orders": 737,
+        "qty": 753,
+        "revenue": 9441.95
+      },
+      "2024-08 (agosto 2024)": {
+        "orders": 600,
+        "qty": 614,
+        "revenue": 7670.9
+      },
+      "2024-09 (septiembre 2024)": {
+        "orders": 725,
+        "qty": 736,
+        "revenue": 9213.1
+      },
+      "2024-10 (octubre 2024)": {
+        "orders": 658,
+        "qty": 675,
+        "revenue": 7926.3
+      },
+      "2024-11 (noviembre 2024)": {
+        "orders": 775,
+        "qty": 795,
+        "revenue": 9812.4
+      },
+      "2024-12 (diciembre 2024)": {
+        "orders": 566,
+        "qty": 573,
+        "revenue": 7387.3
+      },
+      "2025-01 (enero 2025)": {
+        "orders": 4156,
+        "qty": 4232,
+        "revenue": 53070.4
+      },
+      "2025-02 (febrero 2025)": {
+        "orders": 3892,
+        "qty": 3961,
+        "revenue": 49895.15
+      },
+      "2025-03 (marzo 2025)": {
+        "orders": 4186,
+        "qty": 4261,
+        "revenue": 54172.8
+      },
+      "2025-04 (abril 2025)": {
+        "orders": 4067,
+        "qty": 4151,
+        "revenue": 52223.15
+      },
+      "2025-05 (mayo 2025)": {
+        "orders": 4239,
+        "qty": 4328,
+        "revenue": 54954.35
+      },
+      "2025-06 (junio 2025)": {
+        "orders": 4025,
+        "qty": 4107,
+        "revenue": 51743.1
+      },
+      "2025-07 (julio 2025)": {
+        "orders": 4301,
+        "qty": 4392,
+        "revenue": 55322.0
+      },
+      "2025-08 (agosto 2025)": {
+        "orders": 4094,
+        "qty": 4168,
+        "revenue": 52077.35
+      },
+      "2025-09 (septiembre 2025)": {
+        "orders": 3821,
+        "qty": 3892,
+        "revenue": 48875.4
+      },
+      "2025-10 (octubre 2025)": {
+        "orders": 3801,
+        "qty": 3887,
+        "revenue": 48530.75
+      },
+      "2025-11 (noviembre 2025)": {
+        "orders": 4185,
+        "qty": 4266,
+        "revenue": 53946.95
+      },
+      "2025-12 (diciembre 2025)": {
+        "orders": 3860,
+        "qty": 3936,
+        "revenue": 49686.05
+      }
+    },
+    "byDayOfWeek": {
+      "mié": {
+        "orders": 8610,
+        "qty": 8788,
+        "revenue": 111476.35
+      },
+      "jue": {
+        "orders": 9262,
+        "qty": 9421,
+        "revenue": 117998.75
+      },
+      "vie": {
+        "orders": 8375,
+        "qty": 8533,
+        "revenue": 106739.45
+      },
+      "sáb": {
+        "orders": 7047,
+        "qty": 7182,
+        "revenue": 90774.1
+      },
+      "dom": {
+        "orders": 7631,
+        "qty": 7771,
+        "revenue": 99109.2
+      },
+      "lun": {
+        "orders": 7960,
+        "qty": 8129,
+        "revenue": 101535.3
+      },
+      "mar": {
+        "orders": 7979,
+        "qty": 8153,
+        "revenue": 102377.65
       }
     },
     "topPizzas": [
