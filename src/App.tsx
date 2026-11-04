@@ -45,9 +45,10 @@ export function App() {
 
   const [activeTab, setActiveTab] = useState<'cashier' | 'admin'>('cashier');
 
-  const [geminiApiKey, setGeminiApiKey] = useState<string>(
-    () => localStorage.getItem('pizza_gemini_key') || (import.meta as any).env?.VITE_GEMINI_API_KEY || ''
-  );
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(() => {
+    const env = (import.meta as any).env || {};
+    return env.VITE_GEMINI_API_KEY_1 || localStorage.getItem('pizza_gemini_key') || env.VITE_GEMINI_API_KEY || '';
+  });
   const [appsScriptUrl, setAppsScriptUrl] = useState<string>(() => {
     const saved = localStorage.getItem('pizza_apps_script_url');
     if (!saved || saved.includes('AKfycbx8MtmqY8p1j6pAjxIR76r3RNQd1UENVO3v4jSxachoGE37ElRO9eUxs_SxTmTQtEdwjQ')) {

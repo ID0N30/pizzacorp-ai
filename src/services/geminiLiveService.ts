@@ -192,11 +192,29 @@ export function parseNaturalVoiceOrder(
   };
 }
 
+/**
+ * Devuelve la lista ordenada de claves API activas desde las variables de entorno (.env.local / Vercel):
+ * 1) VITE_GEMINI_API_KEY_1 (Principal — soporta gemini-2.5-flash 1.3s + TTS Aoede 200 OK + gemini-3.5-flash-lite)
+ * 2) VITE_GEMINI_API_KEY (Secundaria — respaldo y balanceo de carga en gemini-3.5-flash-lite 1.2s)
+ */
+export function getDualApiKeys(preferredOverride?: string, preferSecondaryFirst = false): string[] {
+  const env = (import.meta as any).env || {};
+  const k1 = (env.VITE_GEMINI_API_KEY_1 || '').trim();
+  const k2 = (env.VITE_GEMINI_API_KEY || '').trim();
+  const custom = (preferredOverride || '').trim();
+
+  const ordered = preferSecondaryFirst ? [k2, k1] : [k1, k2];
+  if (custom && custom.length > 15 && custom !== k2) {
+    ordered.unshift(custom);
+  }
+  return Array.from(new Set(ordered.filter((k) => k && k.length > 15)));
+}
+
 let sharedTtsAudioCtx: AudioContext | null = null;
-// Caché en memoria para respuestas de audio repetidas (saludo, confirmaciones) -> 0ms latencia y ahorra cuota
+// Caché en memoria para respuestas de audio repetidas -> 0ms latencia y ahorra cuota en ambas cuentas
 const ttsPcmCache = new Map<string, string>();
-// Circuit breaker cuando gemini-2.5-flash-preview-tts alcanza el límite gratuito de 10 peticiones/día (HTTP 429)
-let ttsQuotaExhaustedUntil = 0;
+// Circuit breaker independiente por cada API Key cuando alcanza límite de cuota (HTTP 429)
+const ttsQuotaExhaustedByKey = new Map<string, number>();
 
 // Precargar voces del navegador apenas carga el módulo para evitar que getVoices() devuelva []
 let cachedBrowserVoices: SpeechSynthesisVoice[] = [];
@@ -215,7 +233,7 @@ export function stopSpeaking() {
   }
   if (sharedTtsAudioCtx && sharedTtsAudioCtx.state === 'running') {
     try {
-      sharedTtsAudioCtx. close();
+      sharedTtsAudioCtx.close();
       sharedTtsAudioCtx = null;
     } catch {}
   }
@@ -290,8 +308,6 @@ export async function speakSpanish(
   onStart?: () => void,
   onEnd?: () => void
 ) {
-  const cleanKey = apiKey?.trim() || (import.meta as any).env?.VITE_GEMINI_API_KEY?.trim() || '';
-
   // Limpiar símbolos markdown y abreviaturas para que la lectura sea natural y rápida
   const cleanText = text
     .replace(/[*#_`~•]/g, '')
@@ -300,8 +316,9 @@ export async function speakSpanish(
     .replace(/\buds\b/gi, 'unidades')
     .trim();
 
-  if (cleanKey.length > 15) {
-    const playedByRestTts = await speakViaGeminiRestTTS(cleanText, cleanKey, onStart, onEnd);
+  const keys = getDualApiKeys(apiKey, false);
+  if (keys.length > 0) {
+    const playedByRestTts = await speakViaGeminiRestTTS(cleanText, keys, onStart, onEnd);
     if (playedByRestTts) return;
   }
 
@@ -344,7 +361,7 @@ export async function speakSpanish(
 
 async function speakViaGeminiRestTTS(
   textToRead: string,
-  apiKey: string,
+  apiKeys: string[],
   onStart?: () => void,
   onEnd?: () => void
 ): Promise<boolean> {
@@ -362,60 +379,68 @@ async function speakViaGeminiRestTTS(
       return true;
     }
 
-    // 2. Si la cuota gratuita de 10 peticiones/día de gemini-2.5-flash-preview-tts se agotó (429),
-    // saltar de inmediato sin perder 1.5 segundos esperando el error 429.
-    if (Date.now() < ttsQuotaExhaustedUntil) {
-      return false;
-    }
+    // 2. Probar primero con VITE_GEMINI_API_KEY_1 (Principal) y luego con la Secundaria si aplica
+    for (const key of apiKeys) {
+      const exhaustedUntil = ttsQuotaExhaustedByKey.get(key) || 0;
+      if (Date.now() < exhaustedUntil) {
+        continue;
+      }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3800);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3800);
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: textToRead }] }],
-          generationConfig: {
-            responseModalities: ['AUDIO'],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: 'Aoede'
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${key}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: textToRead }] }],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                  voiceConfig: {
+                    prebuiltVoiceConfig: {
+                      voiceName: 'Aoede'
+                    }
+                  }
                 }
               }
-            }
+            })
           }
-        })
+        );
+        clearTimeout(timeoutId);
+
+        if (res.status === 429) {
+          // Marcar solo esta API Key en enfriamiento por 10 minutos y pasar de inmediato a la siguiente clave
+          ttsQuotaExhaustedByKey.set(key, Date.now() + 10 * 60 * 1000);
+          continue;
+        }
+
+        if (!res.ok) continue;
+        const data = await res.json();
+        const base64Audio = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        if (!base64Audio) continue;
+
+        ttsPcmCache.set(textToRead, base64Audio);
+
+        if (!sharedTtsAudioCtx || sharedTtsAudioCtx.state === 'closed') {
+          sharedTtsAudioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+        }
+        if (sharedTtsAudioCtx.state === 'suspended') {
+          await sharedTtsAudioCtx.resume();
+        }
+
+        playBase64Pcm24k(base64Audio, sharedTtsAudioCtx, onStart, onEnd);
+        return true;
+      } catch {
+        clearTimeout(timeoutId);
       }
-    );
-    clearTimeout(timeoutId);
-
-    if (res.status === 429) {
-      // Cuota de 10 req/día o RPM alcanzada: activar circuit breaker por 10 minutos para no penalizar el tiempo de respuesta
-      ttsQuotaExhaustedUntil = Date.now() + 10 * 60 * 1000;
-      return false;
     }
 
-    if (!res.ok) return false;
-    const data = await res.json();
-    const base64Audio = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!base64Audio) return false;
-
-    ttsPcmCache.set(textToRead, base64Audio);
-
-    if (!sharedTtsAudioCtx || sharedTtsAudioCtx.state === 'closed') {
-      sharedTtsAudioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-    }
-    if (sharedTtsAudioCtx.state === 'suspended') {
-      await sharedTtsAudioCtx.resume();
-    }
-
-    playBase64Pcm24k(base64Audio, sharedTtsAudioCtx, onStart, onEnd);
-    return true;
+    return false;
   } catch {
     return false;
   }
@@ -435,10 +460,9 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 /**
- * Envía el audio grabado a los modelos verificados con 200 OK en tu API Key:
- * 1) gemini-3.5-flash-lite (2.7s, AUDIO+JSON 200 OK)
- * 2) gemini-3.6-flash (AUDIO+JSON 200 OK)
- * 3) gemini-3-flash-preview (200 OK)
+ * Envía el audio grabado aprovechando las DOS claves API:
+ * - Clave 1 (Principal VITE_GEMINI_API_KEY_1): gemini-2.5-flash (2.2s) y gemini-3.5-flash-lite
+ * - Clave 2 (Secundaria VITE_GEMINI_API_KEY): gemini-3.5-flash-lite (1.2s) y gemini-3.6-flash
  */
 async function processAudioTurnWithVerifiedGemini(
   base64Audio: string,
@@ -480,13 +504,21 @@ Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura:
   "confirm": false
 }`;
 
-  // Modelos verificados con 200 OK en el diagnóstico de la clave AQ.Ab8RN6...
-  const verifiedModels = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3-flash-preview'];
+  const keys = getDualApiKeys(apiKey, false);
+  const attempts: Array<{ key: string; model: string }> = [];
+  if (keys[0]) {
+    attempts.push({ key: keys[0], model: 'gemini-2.5-flash' });
+    attempts.push({ key: keys[0], model: 'gemini-3.5-flash-lite' });
+  }
+  if (keys[1]) {
+    attempts.push({ key: keys[1], model: 'gemini-3.5-flash-lite' });
+    attempts.push({ key: keys[1], model: 'gemini-3.6-flash' });
+  }
 
-  for (const modelName of verifiedModels) {
+  for (const { key, model } of attempts) {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

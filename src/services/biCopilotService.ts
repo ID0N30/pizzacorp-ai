@@ -1,4 +1,5 @@
 import { FactVentaRow } from '../types';
+import { getDualApiKeys } from './geminiLiveService';
 
 export interface BICopilotContext {
   totalHistoricalRows: number;
@@ -130,9 +131,11 @@ export async function askBICopilot(
   ctx: BICopilotContext,
   apiKey?: string
 ): Promise<BICopilotResponse> {
-  const cleanKey = apiKey?.trim() || (import.meta as any).env?.VITE_GEMINI_API_KEY?.trim() || '';
+  // En el Admin BI usamos primero la clave secundaria para descargar la clave principal (que atiende TTS y voz en vivo),
+  // y si falla, conmuta en milisegundos a la clave principal.
+  const keys = getDualApiKeys(apiKey, true);
 
-  if (cleanKey.length > 15) {
+  if (keys.length > 0) {
     const prompt = `Eres el Analista IA de Inteligencia de Negocios de PizzaCorp conectado al Excel y Power BI.
 Datos exactos en tiempo real:
 ${buildContextSummaryText(ctx)}
@@ -145,11 +148,16 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
   "spokenSummary": "Resumen hablado natural de máximo 2 oraciones breves en español (sin símbolos ni listas) para leer en voz alta rápidamente."
 }`;
 
-    const verifiedModels = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3-flash-preview'];
-    for (const modelName of verifiedModels) {
+    const attempts: Array<{ key: string; model: string }> = [];
+    for (const k of keys) {
+      attempts.push({ key: k, model: 'gemini-3.5-flash-lite' });
+      attempts.push({ key: k, model: 'gemini-2.5-flash' });
+    }
+
+    for (const { key, model } of attempts) {
       try {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${cleanKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -187,7 +195,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 }
 
 /**
- * Escucha la pregunta en audio del administrador y responde en UN SOLO paso con gemini-3.5-flash-lite
+ * Escucha la pregunta en audio del administrador y responde en UN SOLO paso usando el pool de dos claves API
  */
 export async function askBICopilotByAudio(
   base64Audio: string,
@@ -195,8 +203,8 @@ export async function askBICopilotByAudio(
   ctx: BICopilotContext,
   apiKey?: string
 ): Promise<BICopilotResponse | null> {
-  const cleanKey = apiKey?.trim() || (import.meta as any).env?.VITE_GEMINI_API_KEY?.trim() || '';
-  if (cleanKey.length <= 15) return null;
+  const keys = getDualApiKeys(apiKey, false);
+  if (keys.length === 0) return null;
 
   const prompt = `Escucha el audio del administrador preguntando sobre el negocio de pizzas y el tablero de Power BI / Excel.
 Si el audio solo tiene silencio o ruido sin palabras, devuelve:
@@ -212,11 +220,20 @@ Devuelve ÚNICAMENTE un objeto JSON válido con:
   "spokenSummary": "resumen hablado directo en 1 o 2 frases cortas sin símbolos para decir por voz"
 }`;
 
-  const verifiedModels = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3-flash-preview'];
-  for (const modelName of verifiedModels) {
+  const attempts: Array<{ key: string; model: string }> = [];
+  if (keys[0]) {
+    attempts.push({ key: keys[0], model: 'gemini-2.5-flash' });
+    attempts.push({ key: keys[0], model: 'gemini-3.5-flash-lite' });
+  }
+  if (keys[1]) {
+    attempts.push({ key: keys[1], model: 'gemini-3.5-flash-lite' });
+    attempts.push({ key: keys[1], model: 'gemini-3.6-flash' });
+  }
+
+  for (const { key, model } of attempts) {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${cleanKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
