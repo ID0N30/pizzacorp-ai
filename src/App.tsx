@@ -12,8 +12,7 @@ import {
   Zap,
   Pizza,
   Plus,
-  RefreshCw,
-  ExternalLink
+  RefreshCw
 } from 'lucide-react';
 import rawModelData from './data/pizzaModelData.json';
 import { CartItem, CityItem, FactVentaRow, PizzaItem, SaleChannelItem } from './types';
@@ -25,7 +24,7 @@ import {
 import {
   GeminiLiveVoiceSession,
   AdminVoiceRecorder,
-  parseNaturalVoiceOrder,
+  processTextTurnWithVerifiedGemini,
   speakSpanish,
   stopSpeaking
 } from './services/geminiLiveService';
@@ -56,9 +55,6 @@ export function App() {
     }
     return saved;
   });
-  const [powerBiUrl, setPowerBiUrl] = useState<string>(
-    () => localStorage.getItem('pizza_powerbi_url') || ''
-  );
   const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
 
   // Estado del Pedido
@@ -87,18 +83,20 @@ export function App() {
   const [audioLevel, setAudioLevel] = useState<number>(0);
   const [userTranscript, setUserTranscript] = useState<string>('');
   const [aiResponseText, setAiResponseText] = useState<string>(
-    'Hola, bienvenido a PizzaCorp. Toca el micrófono y dime qué pizzas deseas pedir.'
+    'Hola, bienvenido a PizzaCorp. Puedes pedirme tus pizzas, preguntarme sus ingredientes o cambiar tu pedido en cualquier momento.'
   );
   const [manualInput, setManualInput] = useState<string>('');
+  const [manualLoading, setManualLoading] = useState<boolean>(false);
+  const [cashierHistory, setCashierHistory] = useState<Array<{ role: string; text: string }>>([]);
   const [toast, setToast] = useState<string | null>(null);
 
-  // Estado Admin & Power BI
-  const [biViewMode, setBiViewMode] = useState<'mirror' | 'skus' | 'live_table' | 'powerbi_embed'>('mirror');
+  // Estado Tablero de Consultas Admin con IA
+  const [biViewMode, setBiViewMode] = useState<'mirror' | 'skus' | 'live_table'>('mirror');
   const [biMessages, setBiMessages] = useState<Array<{ role: 'user' | 'ai'; text: string; spoken?: string }>>([
     {
       role: 'ai',
-      text: 'Hola. Soy el Analista IA conectado en tiempo real a tu modelo Excel (56,864 filas base) y Power BI. Puedes preguntarme por voz o texto sobre ciudades, canales, top pizzas o ventas del día.',
-      spoken: 'Hola. Soy el analista IA conectado a tu Excel y Power BI. ¿Qué dato deseas consultar?'
+      text: 'Hola. Soy el Analista IA conectado en tiempo real a las tablas de tu modelo Excel (56,864 filas base). Puedes preguntarme por voz o texto sobre ventas por ciudad, canales, top pizzas, ingredientes o pedidos del día.',
+      spoken: 'Hola. Soy el analista IA conectado a los datos de tu modelo Excel. ¿Qué deseas consultar?'
     }
   ]);
   const [biInput, setBiInput] = useState<string>('');
@@ -136,10 +134,6 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('pizza_apps_script_url', appsScriptUrl);
   }, [appsScriptUrl]);
-
-  useEffect(() => {
-    localStorage.setItem('pizza_powerbi_url', powerBiUrl);
-  }, [powerBiUrl]);
 
   useEffect(() => {
     biChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -196,23 +190,69 @@ export function App() {
     };
   }, [liveRows]);
 
+  const findPizzaByIdOrFuzzy = (pizzaId: string): PizzaItem | undefined => {
+    const clean = pizzaId.toLowerCase().trim();
+    return (
+      pizzas.find((p) => p.pizza_id.toLowerCase() === clean) ||
+      pizzas.find((p) => p.pizza_type_id.toLowerCase() === clean && p.size.toUpperCase() === 'M') ||
+      pizzas.find((p) => p.pizza_id.toLowerCase().includes(clean))
+    );
+  };
+
   const handleAddPizzaById = (pizzaId: string, quantity: number = 1) => {
-    const found =
-      pizzas.find((p) => p.pizza_id.toLowerCase() === pizzaId.toLowerCase()) ||
-      pizzas.find((p) => p.pizza_id.toLowerCase().includes(pizzaId.toLowerCase()));
+    const found = findPizzaByIdOrFuzzy(pizzaId);
     if (!found) return;
 
     setCart((prev) => {
       const existing = prev.find((item) => item.pizza.pizza_id === found.pizza_id);
-      if (existing) {
-        return prev.map((item) =>
-          item.pizza.pizza_id === found.pizza_id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      return [...prev, { pizza: found, quantity }];
+      const next = existing
+        ? prev.map((item) =>
+            item.pizza.pizza_id === found.pizza_id
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          )
+        : [...prev, { pizza: found, quantity }];
+      cartRef.current = next;
+      return next;
     });
+  };
+
+  const handleRemovePizzaById = (pizzaId: string, quantity?: number) => {
+    const clean = pizzaId.toLowerCase().trim();
+    setCart((prev) => {
+      const next = prev
+        .map((item) => {
+          const matches =
+            item.pizza.pizza_id.toLowerCase() === clean ||
+            item.pizza.pizza_type_id.toLowerCase() === clean ||
+            item.pizza.pizza_id.toLowerCase().includes(clean);
+          if (!matches) return item;
+          if (quantity === undefined || quantity <= 0 || item.quantity <= quantity) {
+            return null;
+          }
+          return { ...item, quantity: item.quantity - quantity };
+        })
+        .filter(Boolean) as CartItem[];
+      cartRef.current = next;
+      return next;
+    });
+  };
+
+  const handleSetCartItems = (items: Array<{ pizzaId: string; quantity: number }>) => {
+    const built: CartItem[] = [];
+    for (const entry of items) {
+      const found = findPizzaByIdOrFuzzy(entry.pizzaId);
+      if (found && entry.quantity > 0) {
+        const existing = built.find((b) => b.pizza.pizza_id === found.pizza_id);
+        if (existing) {
+          existing.quantity += entry.quantity;
+        } else {
+          built.push({ pizza: found, quantity: entry.quantity });
+        }
+      }
+    }
+    cartRef.current = built;
+    setCart(built);
   };
 
   const handleConfirmOrder = async (source: 'voz_ia' | 'manual' = 'voz_ia') => {
@@ -249,6 +289,7 @@ export function App() {
 
     setLastOrderId(newOrderId);
     setLiveRows((prev) => [...newRows, ...prev]);
+    cartRef.current = [];
     setCart([]);
 
     const syncRes = await syncRowsToGoogleSheets(appsScriptUrl, newRows);
@@ -331,11 +372,17 @@ export function App() {
       cities,
       channels,
       {
+        getCurrentCart: () => cartRef.current,
         onAddPizza: (pid, qty) => handleAddPizzaById(pid, qty),
+        onRemovePizza: (pid, qty) => handleRemovePizzaById(pid, qty),
+        onSetCart: (items) => handleSetCartItems(items),
         onSetCity: (cid) => setSelectedCityId(cid),
         onSetChannel: (chid) => setSelectedChannelId(chid),
         onConfirmOrder: () => handleConfirmOrder('voz_ia'),
-        onClearCart: () => setCart([]),
+        onClearCart: () => {
+          cartRef.current = [];
+          setCart([]);
+        },
         onTranscriptUser: (text) => setUserTranscript(text),
         onTranscriptAI: (text) => setAiResponseText(text),
         onStatusChange: (st, detail) => {
@@ -350,26 +397,41 @@ export function App() {
     await session.start();
   };
 
-  const handleManualCommand = (e: React.FormEvent) => {
+  const handleManualCommand = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!manualInput.trim()) return;
+    if (!manualInput.trim() || manualLoading) return;
     const phrase = manualInput.trim();
     setManualInput('');
     setUserTranscript(phrase);
+    setManualLoading(true);
 
-    const res = parseNaturalVoiceOrder(phrase, pizzas, cities, channels, {
-      onAddPizza: (pid, qty) => handleAddPizzaById(pid, qty),
-      onSetCity: (cid) => setSelectedCityId(cid),
-      onSetChannel: (chid) => setSelectedChannelId(chid),
-      onConfirmOrder: () => handleConfirmOrder('voz_ia'),
-      onClearCart: () => setCart([]),
-      onTranscriptUser: () => {},
-      onTranscriptAI: () => {},
-      onStatusChange: () => {},
-      onAudioLevel: () => {}
-    });
+    const updatedHist = [...cashierHistory, { role: 'user', text: phrase }];
+    const reply = await processTextTurnWithVerifiedGemini(
+      phrase,
+      updatedHist,
+      pizzas,
+      geminiApiKey,
+      {
+        getCurrentCart: () => cartRef.current,
+        onAddPizza: (pid, qty) => handleAddPizzaById(pid, qty),
+        onRemovePizza: (pid, qty) => handleRemovePizzaById(pid, qty),
+        onSetCart: (items) => handleSetCartItems(items),
+        onSetCity: (cid) => setSelectedCityId(cid),
+        onSetChannel: (chid) => setSelectedChannelId(chid),
+        onConfirmOrder: () => handleConfirmOrder('voz_ia'),
+        onClearCart: () => {
+          cartRef.current = [];
+          setCart([]);
+        },
+        onTranscriptUser: () => {},
+        onTranscriptAI: () => {},
+        onStatusChange: () => {},
+        onAudioLevel: () => {}
+      }
+    );
 
-    const reply = res.reply || 'Dime qué pizza deseas agregar o di confirmar pedido.';
+    setManualLoading(false);
+    setCashierHistory([...updatedHist, { role: 'ai', text: reply }]);
     setAiResponseText(reply);
     speakSpanish(reply, geminiApiKey);
   };
@@ -501,7 +563,7 @@ export function App() {
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
-              Admin & Power BI
+              Consultas Admin IA
               {liveRows.length > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold">
                   +{liveRows.length}
@@ -536,7 +598,7 @@ export function App() {
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6">
         {activeTab === 'cashier' ? (
           /* =========================================================
-             VISTA 1: PEDIDOS POR VOZ (2 TARJETAS SIMPLES Y DIRECTAS)
+             VISTA 1: PEDIDOS POR VOZ (CON INGREDIENTES Y ARREPENTIMIENTO)
              ========================================================= */
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
             {/* IZQUIERDA: CONVERSACIÓN DE VOZ CON GEMINI */}
@@ -602,7 +664,9 @@ export function App() {
                     Tú dijiste
                   </div>
                   <p className="text-sm text-slate-800">
-                    {userTranscript ? `"${userTranscript}"` : 'Ej: "Quiero dos pizzas hawaianas medianas en Chicago"'}
+                    {userTranscript
+                      ? `"${userTranscript}"`
+                      : 'Ej: "Quiero 2 pizzas hawaianas" → "Mejor que sean 2 de pollo medianas" → "¿Qué ingredientes tiene?"'}
                   </p>
                 </div>
 
@@ -618,7 +682,9 @@ export function App() {
                       <Volume2 className="w-3.5 h-3.5" /> Escuchar
                     </button>
                   </div>
-                  <p className="text-sm text-slate-900">{aiResponseText}</p>
+                  <p className="text-sm text-slate-900">
+                    {manualLoading ? '⏳ Procesando tu solicitud con Gemini...' : aiResponseText}
+                  </p>
                 </div>
               </div>
 
@@ -628,12 +694,13 @@ export function App() {
                   type="text"
                   value={manualInput}
                   onChange={(e) => setManualInput(e.target.value)}
-                  placeholder="O escribe tu pedido aquí..."
+                  placeholder="Escribe tu pedido, cambia una pizza o pregunta ingredientes..."
                   className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white"
                 />
                 <button
                   type="submit"
-                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold"
+                  disabled={manualLoading}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
@@ -652,8 +719,11 @@ export function App() {
                   </div>
                   {cart.length > 0 && (
                     <button
-                      onClick={() => setCart([])}
-                      className="text-xs text-slate-400 hover:text-red-600"
+                      onClick={() => {
+                        cartRef.current = [];
+                        setCart([]);
+                      }}
+                      className="text-xs text-slate-400 hover:text-red-600 font-medium"
                     >
                       Vaciar
                     </button>
@@ -718,40 +788,33 @@ export function App() {
                   </button>
                 </div>
 
-                {/* LISTA DE ÍTEMS EN EL CARRITO */}
-                <div className="space-y-2 min-h-[160px] max-h-[240px] overflow-y-auto">
+                {/* LISTA DE ÍTEMS EN EL CARRITO CON INGREDIENTES */}
+                <div className="space-y-2 min-h-[160px] max-h-[250px] overflow-y-auto">
                   {cart.length === 0 ? (
-                    <div className="h-36 flex items-center justify-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
-                      No hay pizzas en la orden todavía.
+                    <div className="h-36 flex items-center justify-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl p-4 text-center">
+                      No hay pizzas en la orden todavía. Puedes agregarlas hablando o pedirle a la IA que las cambie si te arrepientes.
                     </div>
                   ) : (
                     cart.map((item) => (
                       <div
                         key={item.pizza.pizza_id}
-                        className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs"
+                        className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs gap-2"
                       >
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <div className="font-bold text-slate-900">
                             {item.pizza.name} ({item.pizza.size})
                           </div>
-                          <div className="text-[11px] text-slate-500 font-mono-code">
+                          <div className="text-[11px] text-slate-500 truncate" title={item.pizza.ingredients}>
+                            {item.pizza.ingredients}
+                          </div>
+                          <div className="text-[11px] text-blue-600 font-mono-code mt-0.5">
                             ID: {item.pizza.pizza_id} • ${item.pizza.price.toFixed(2)} c/u
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
-                            onClick={() =>
-                              setCart((prev) =>
-                                prev
-                                  .map((c) =>
-                                    c.pizza.pizza_id === item.pizza.pizza_id
-                                      ? { ...c, quantity: c.quantity - 1 }
-                                      : c
-                                  )
-                                  .filter((c) => c.quantity > 0)
-                              )
-                            }
+                            onClick={() => handleRemovePizzaById(item.pizza.pizza_id, 1)}
                             className="w-6 h-6 rounded-lg bg-white border border-slate-200 font-bold"
                           >
                             -
@@ -764,9 +827,7 @@ export function App() {
                             +
                           </button>
                           <button
-                            onClick={() =>
-                              setCart((prev) => prev.filter((c) => c.pizza.pizza_id !== item.pizza.pizza_id))
-                            }
+                            onClick={() => handleRemovePizzaById(item.pizza.pizza_id)}
                             className="text-slate-400 hover:text-red-600 ml-1"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -800,10 +861,10 @@ export function App() {
           </div>
         ) : (
           /* =========================================================
-             VISTA 2: ADMIN & POWER BI (100% FUNCIONAL Y EJECUTIVA)
+             VISTA 2: TABLERO DE CONSULTAS ADMIN CON IA
              ========================================================= */
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            {/* IZQUIERDA: MÉTRICAS, MODELO Y TABLERO POWER BI */}
+            {/* IZQUIERDA: MÉTRICAS EJECUTIVAS DEL MODELO EXCEL */}
             <div className="md:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
               {/* 3 KPIS + SIMULADOR */}
               <div className="grid grid-cols-3 gap-3">
@@ -877,16 +938,6 @@ export function App() {
                   }`}
                 >
                   Filas Nuevas ({liveRows.length})
-                </button>
-                <button
-                  onClick={() => setBiViewMode('powerbi_embed')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                    biViewMode === 'powerbi_embed'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  Tablero Power BI
                 </button>
               </div>
 
@@ -1087,56 +1138,15 @@ export function App() {
                   )}
                 </div>
               )}
-
-              {biViewMode === 'powerbi_embed' && (
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={powerBiUrl}
-                      onChange={(e) => setPowerBiUrl(e.target.value)}
-                      placeholder="Pega aquí el enlace 'Publicar en la web' de tu tablero de Power BI..."
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs"
-                    />
-                    {powerBiUrl && (
-                      <a
-                        href={powerBiUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" /> Abrir
-                      </a>
-                    )}
-                  </div>
-                  {powerBiUrl ? (
-                    <iframe
-                      title="Power BI"
-                      src={powerBiUrl}
-                      className="w-full h-[360px] rounded-xl border border-slate-200"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <div className="h-[320px] rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-xs text-slate-400 p-6 text-center gap-2">
-                      <p className="font-semibold text-slate-600">
-                        Conecta tu visualización interactiva de Power BI
-                      </p>
-                      <p className="max-w-md">
-                        En Power BI selecciona <b>Archivo → Insertar informe → Publicar en la web</b> y pega el enlace arriba para visualizarlo aquí junto al Analista de Voz IA.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
-            {/* DERECHA: CHAT Y VOZ REAL CON EL ANALISTA IA */}
+            {/* DERECHA: TABLERO DE CONSULTAS ADMIN CON IA */}
             <div className="md:col-span-5 bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col h-[540px]">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
-                  <h3 className="font-bold text-sm text-slate-900">Consultar Datos a la IA</h3>
+                  <h3 className="font-bold text-sm text-slate-900">Tablero de Consultas Admin con IA</h3>
                   <p className="text-xs text-slate-500">
-                    Pregunta por voz o texto sobre el modelo Excel / Power BI
+                    Pregunta por voz o texto sobre ventas, sedes e ingredientes
                   </p>
                 </div>
 
@@ -1195,9 +1205,9 @@ export function App() {
                 {[
                   '¿Qué ciudad vende más?',
                   'Top 5 pizzas más vendidas',
+                  '¿Qué ingredientes lleva la Hawaiana?',
                   '¿Cuál es la pizza menos vendida?',
-                  'Ventas por canal',
-                  'Resumen de ventas hoy'
+                  'Ventas por canal'
                 ].map((q) => (
                   <button
                     key={q}
@@ -1243,7 +1253,7 @@ export function App() {
                 ))}
                 {biLoading && (
                   <div className="text-xs text-blue-600 font-medium animate-pulse">
-                    ⏳ Analizando modelo de datos con Gemini 3.5...
+                    ⏳ Analizando modelo de datos con Gemini...
                   </div>
                 )}
                 <div ref={biChatEndRef} />
@@ -1261,7 +1271,7 @@ export function App() {
                   type="text"
                   value={biInput}
                   onChange={(e) => setBiInput(e.target.value)}
-                  placeholder="Pregunta sobre ciudades, canales, ingresos o pizzas..."
+                  placeholder="Pregunta sobre ciudades, canales, ingresos o ingredientes..."
                   className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-600"
                 />
                 <button

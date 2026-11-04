@@ -1,7 +1,10 @@
-import { CityItem, PizzaItem, SaleChannelItem } from '../types';
+import { CartItem, CityItem, PizzaItem, SaleChannelItem } from '../types';
 
 export interface VoiceActionCallbacks {
+  getCurrentCart?: () => CartItem[];
   onAddPizza: (pizzaId: string, quantity: number) => void;
+  onRemovePizza?: (pizzaId: string, quantity?: number) => void;
+  onSetCart?: (items: Array<{ pizzaId: string; quantity: number }>) => void;
   onSetCity: (cityId: number) => void;
   onSetChannel: (channelId: number) => void;
   onConfirmOrder: () => void;
@@ -19,15 +22,15 @@ const SPANISH_NUMBERS: Record<string, number> = {
 };
 
 const PIZZA_ALIASES: Array<{ keywords: string[]; typeId: string; label: string }> = [
-  { keywords: ['hawaiana', 'hawaiian', 'piña', 'jamon y piña'], typeId: 'hawaiian', label: 'The Hawaiian Pizza' },
+  { keywords: ['hawaiana', 'hawaianas', 'hawayana', 'hawayanas', 'hawaiian', 'piña', 'jamon y piña'], typeId: 'hawaiian', label: 'The Hawaiian Pizza' },
   { keywords: ['pepperoni salami', 'peperoni salami', 'salami'], typeId: 'peppr_salami', label: 'The Pepperoni, Mushroom, and Peppers Pizza' },
   { keywords: ['pepperoni', 'peperoni'], typeId: 'pepperoni', label: 'The Pepperoni Pizza' },
-  { keywords: ['barbecue', 'bbq', 'barbacoa', 'pollo bbq', 'pollo barbacoa'], typeId: 'bbq_ckn', label: 'The Barbecue Chicken Pizza' },
   { keywords: ['california', 'pollo california'], typeId: 'cali_ckn', label: 'The California Chicken Pizza' },
   { keywords: ['alfredo', 'pollo alfredo'], typeId: 'ckn_alfredo', label: 'The Chicken Alfredo Pizza' },
   { keywords: ['pesto', 'pollo pesto'], typeId: 'ckn_pesto', label: 'The Chicken Pesto Pizza' },
-  { keywords: ['southwest', 'suroeste', 'chipotle'], typeId: 'southw_ckn', label: 'The Southwest Chicken Pizza' },
+  { keywords: ['southwest', 'suroeste', 'chipotle', 'pollo chipotle'], typeId: 'southw_ckn', label: 'The Southwest Chicken Pizza' },
   { keywords: ['thai', 'tailandesa', 'pollo thai'], typeId: 'thai_ckn', label: 'The Thai Chicken Pizza' },
+  { keywords: ['barbecue', 'bbq', 'barbacoa', 'pollo bbq', 'pollo barbacoa', 'de pollo', 'pollo'], typeId: 'bbq_ckn', label: 'The Barbecue Chicken Pizza' },
   { keywords: ['big meat', 'mucha carne', 'carnivora', 'carnes'], typeId: 'big_meat', label: 'The Big Meat Pizza' },
   { keywords: ['classic deluxe', 'clasica deluxe', 'clasica', 'deluxe'], typeId: 'classic_dlx', label: 'The Classic Deluxe Pizza' },
   { keywords: ['italiana capocollo', 'capocollo'], typeId: 'ital_cpcllo', label: 'The Italian Capocollo Pizza' },
@@ -39,9 +42,9 @@ const PIZZA_ALIASES: Array<{ keywords: string[]; typeId: string; label: string }
   { keywords: ['italiana vegetales', 'italiana vegetariana', 'italian vegetables'], typeId: 'ital_veggie', label: 'The Italian Vegetables Pizza' },
   { keywords: ['mediterranea', 'mediterraneo'], typeId: 'mediterraneo', label: 'The Mediterranean Pizza' },
   { keywords: ['mexicana', 'mexicano', 'jalapeño'], typeId: 'mexicana', label: 'The Mexicana Pizza' },
-  { keywords: ['espinaca y feta', 'spinach and feta', 'feta'], typeId: 'spin_pesto', label: 'The Spinach Pesto Pizza' },
-  { keywords: ['espinaca', 'spinach'], typeId: 'spinach_fet', label: 'The Spinach and Feta Pizza' },
-  { keywords: ['vegetariana', 'vegetables', 'veggie'], typeId: 'veggie_veg', label: 'The Vegetables + Vegetables Pizza' },
+  { keywords: ['espinaca pesto', 'spinach pesto'], typeId: 'spin_pesto', label: 'The Spinach Pesto Pizza' },
+  { keywords: ['espinaca y feta', 'spinach and feta', 'feta', 'espinaca', 'spinach'], typeId: 'spinach_fet', label: 'The Spinach and Feta Pizza' },
+  { keywords: ['vegetariana', 'vegetables', 'veggie', 'vegetales'], typeId: 'veggie_veg', label: 'The Vegetables + Vegetables Pizza' },
   { keywords: ['brie', 'carre', 'brie carre'], typeId: 'brie_carre', label: 'The Brie Carre Pizza' },
   { keywords: ['calabrese', 'calabresa'], typeId: 'calabrese', label: 'The Calabrese Pizza' },
   { keywords: ['italiana suprema', 'italian supreme'], typeId: 'ital_supr', label: 'The Italian Supreme Pizza' },
@@ -52,6 +55,42 @@ const PIZZA_ALIASES: Array<{ keywords: string[]; typeId: string; label: string }
   { keywords: ['spicy italian', 'italiana picante', 'picante'], typeId: 'spicy_ital', label: 'The Spicy Italian Pizza' },
   { keywords: ['suprema', 'supreme'], typeId: 'spinach_supr', label: 'The Spinach Supreme Pizza' }
 ];
+
+/**
+ * Construye el catálogo completo de las 32 variedades de dim_pizaTipeID con sus ingredientes exactos,
+ * categoría y todos los tamaños/precios disponibles en dim_pizzas.
+ */
+export function buildFullCatalogWithIngredients(pizzas: PizzaItem[]): string {
+  const byType = new Map<
+    string,
+    {
+      name: string;
+      category: string;
+      ingredients: string;
+      sizes: string[];
+    }
+  >();
+
+  for (const p of pizzas) {
+    if (!byType.has(p.pizza_type_id)) {
+      byType.set(p.pizza_type_id, {
+        name: p.name,
+        category: p.category,
+        ingredients: p.ingredients,
+        sizes: []
+      });
+    }
+    byType.get(p.pizza_type_id)!.sizes.push(`${p.size}=${p.pizza_id}($${p.price})`);
+  }
+
+  const lines: string[] = [];
+  for (const [typeId, info] of byType.entries()) {
+    lines.push(
+      `• [${typeId}] ${info.name} (Categoría: ${info.category}) | Ingredientes: ${info.ingredients} | Tamaños: ${info.sizes.join(', ')}`
+    );
+  }
+  return lines.join('\n');
+}
 
 export function parseNaturalVoiceOrder(
   rawText: string,
@@ -65,20 +104,79 @@ export function parseNaturalVoiceOrder(
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
+  const currentCart = callbacks.getCurrentCart ? callbacks.getCurrentCart() : [];
   const actionsTaken: string[] = [];
 
+  // 1. Vaciar todo el carrito explícitamente
   if (
     text.includes('vaciar') ||
     text.includes('limpiar') ||
     text.includes('cancelar todo') ||
-    text.includes('borrar')
+    text.includes('borrar todo') ||
+    text.includes('ya no quiero nada')
   ) {
     callbacks.onClearCart();
     return {
       handled: true,
-      reply: 'He vaciado el pedido actual. ¿Qué pizzas te gustaría ordenar?'
+      reply: 'He vaciado el pedido actual por completo. ¿Qué pizzas te gustaría ordenar?'
     };
   }
+
+  // 2. Consulta de ingredientes ("qué ingredientes tiene...", "qué lleva...", "qué trae...")
+  if (
+    text.includes('ingrediente') ||
+    text.includes('que lleva') ||
+    text.includes('que trae') ||
+    text.includes('que contiene') ||
+    text.includes('de que es')
+  ) {
+    for (const alias of PIZZA_ALIASES) {
+      if (alias.keywords.some((kw) => text.includes(kw))) {
+        const sample = pizzas.find((p) => p.pizza_type_id === alias.typeId);
+        if (sample) {
+          const sizesInfo = pizzas
+            .filter((p) => p.pizza_type_id === alias.typeId)
+            .map((p) => `${p.size} ($${p.price})`)
+            .join(', ');
+          return {
+            handled: true,
+            reply: `La pizza ${sample.name} (categoría ${sample.category}) lleva: ${sample.ingredients}. Está disponible en tamaños ${sizesInfo}. ¿Te gustaría agregarla al pedido?`
+          };
+        }
+      }
+    }
+    return {
+      handled: true,
+      reply: 'Conozco los ingredientes de nuestras 32 variedades de pizza (Hawaiana, Barbecue Chicken, Pepperoni, California Chicken, 5 Quesos, Mexicana, Napolitana y más). ¿De cuál pizza te gustaría saber los ingredientes?'
+    };
+  }
+
+  // 3. Detectar intención de arrepentimiento / reemplazo / cambio de tamaño o precio
+  const isReplacementIntent =
+    text.includes('mejor que sea') ||
+    text.includes('mejor dame') ||
+    text.includes('mejor pon') ||
+    text.includes('sabes que') ||
+    text.includes('en vez de') ||
+    text.includes('en lugar de') ||
+    text.includes('cambia') ||
+    text.includes('cambiala') ||
+    text.includes('cambialas') ||
+    text.includes('muy caro') ||
+    text.includes('mas barata') ||
+    text.includes('mas pequena') ||
+    text.includes('me arrepenti') ||
+    text.includes('no, mejor');
+
+  const isRemoveOnlyIntent =
+    !isReplacementIntent &&
+    (text.includes('quita') ||
+      text.includes('quitar') ||
+      text.includes('saca') ||
+      text.includes('sacar') ||
+      text.includes('elimina') ||
+      text.includes('eliminar') ||
+      text.includes('ya no quiero'));
 
   if (text.includes('chicago')) {
     callbacks.onSetCity(1);
@@ -106,6 +204,7 @@ export function parseNaturalVoiceOrder(
   }
 
   const segments = text.split(/\s+y\s+|,|;/);
+  const newItemsToApply: Array<{ pizza: PizzaItem; qty: number }> = [];
 
   for (const seg of segments) {
     let matchedType: { typeId: string; label: string } | null = null;
@@ -128,6 +227,24 @@ export function parseNaturalVoiceOrder(
       }
     }
 
+    // Si dijo "muy caro, mejor pequeñas" sin repetir el nombre de la pizza, usar la última pizza del carrito
+    if (!matchedType && isReplacementIntent && currentCart.length > 0) {
+      const lastItem = currentCart[currentCart.length - 1];
+      if (
+        seg.includes('pequena') ||
+        seg.includes('pequenas') ||
+        seg.includes('mediana') ||
+        seg.includes('medianas') ||
+        seg.includes('grande') ||
+        seg.includes('grandes')
+      ) {
+        matchedType = {
+          typeId: lastItem.pizza.pizza_type_id,
+          label: lastItem.pizza.name
+        };
+      }
+    }
+
     if (matchedType) {
       let size = 'M';
       if (seg.includes('extra grande') || seg.includes('xl')) size = 'XL';
@@ -140,11 +257,16 @@ export function parseNaturalVoiceOrder(
       if (numMatch) {
         qty = Math.min(25, Math.max(1, parseInt(numMatch[1], 10)));
       } else {
+        let foundWordNum = false;
         for (const [word, val] of Object.entries(SPANISH_NUMBERS)) {
           if (new RegExp(`\\b${word}\\b`).test(seg)) {
             qty = val;
+            foundWordNum = true;
             break;
           }
+        }
+        if (!foundWordNum && isReplacementIntent && currentCart.length > 0) {
+          qty = currentCart[currentCart.length - 1].quantity;
         }
       }
 
@@ -154,8 +276,38 @@ export function parseNaturalVoiceOrder(
         pizzas.find((p) => p.pizza_type_id === matchedType!.typeId);
 
       if (targetPizza) {
-        callbacks.onAddPizza(targetPizza.pizza_id, qty);
-        actionsTaken.push(`${qty} ${targetPizza.name} (${targetPizza.size})`);
+        if (isRemoveOnlyIntent && callbacks.onRemovePizza) {
+          callbacks.onRemovePizza(targetPizza.pizza_id, qty);
+          actionsTaken.push(`quité ${targetPizza.name}`);
+        } else {
+          newItemsToApply.push({ pizza: targetPizza, qty });
+        }
+      }
+    }
+  }
+
+  if (newItemsToApply.length > 0) {
+    if (isReplacementIntent) {
+      // Si el cliente se arrepintió ("mejor que sean...", "muy caro, dame..."), reemplazamos el pedido anterior
+      if (callbacks.onSetCart) {
+        callbacks.onSetCart(newItemsToApply.map((item) => ({ pizzaId: item.pizza.pizza_id, quantity: item.qty })));
+      } else {
+        callbacks.onClearCart();
+        for (const item of newItemsToApply) {
+          callbacks.onAddPizza(item.pizza.pizza_id, item.qty);
+        }
+      }
+      const desc = newItemsToApply
+        .map((i) => `${i.qty} ${i.pizza.name} (${i.pizza.size}, $${(i.pizza.price * i.qty).toFixed(2)})`)
+        .join(', ');
+      return {
+        handled: true,
+        reply: `Perfecto, retiré el pedido anterior y lo cambié por ${desc}. ¿Deseas confirmar o hacer otro cambio?`
+      };
+    } else {
+      for (const item of newItemsToApply) {
+        callbacks.onAddPizza(item.pizza.pizza_id, item.qty);
+        actionsTaken.push(`${item.qty} ${item.pizza.name} (${item.pizza.size})`);
       }
     }
   }
@@ -174,7 +326,7 @@ export function parseNaturalVoiceOrder(
       handled: true,
       reply:
         actionsTaken.length > 0
-          ? `Perfecto, agregué ${actionsTaken.join(', ')} y envié el pedido a Google Sheets.`
+          ? `Perfecto, actualicé ${actionsTaken.join(', ')} y envié el pedido a Google Sheets.`
           : '¡Pedido confirmado y guardado en Google Sheets!'
     };
   }
@@ -182,7 +334,7 @@ export function parseNaturalVoiceOrder(
   if (actionsTaken.length > 0) {
     return {
       handled: true,
-      reply: `Listo, agregué ${actionsTaken.join(', ')}. ¿Deseas algo más o confirmamos el pedido?`
+      reply: `Listo: ${actionsTaken.join(', ')}. ¿Deseas algo más o confirmamos el pedido?`
     };
   }
 
@@ -459,6 +611,141 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
+function formatCurrentCartForPrompt(callbacks: VoiceActionCallbacks): string {
+  const cart = callbacks.getCurrentCart ? callbacks.getCurrentCart() : [];
+  if (!cart || cart.length === 0) {
+    return 'Vacío ($0.00 USD)';
+  }
+  const total = cart.reduce((acc, item) => acc + item.pizza.price * item.quantity, 0);
+  const itemsStr = cart
+    .map(
+      (item) =>
+        `${item.quantity}x ${item.pizza.name} (Tamaño ${item.pizza.size}, pizza_id="${item.pizza.pizza_id}", $${item.pizza.price.toFixed(2)} c/u = $${(item.pizza.price * item.quantity).toFixed(2)})`
+    )
+    .join(' | ');
+  return `${itemsStr} — TOTAL ACTUAL: $${total.toFixed(2)} USD`;
+}
+
+function applyParsedGeminiCartActions(
+  parsed: any,
+  transcript: string,
+  pizzas: PizzaItem[],
+  callbacks: VoiceActionCallbacks
+) {
+  let cartModifiedByGemini = false;
+
+  if (parsed.clearCart === true) {
+    callbacks.onClearCart();
+    cartModifiedByGemini = true;
+  }
+
+  // Si Gemini devuelve setCart (el estado exacto final deseado tras un reemplazo/arrepentimiento)
+  if (Array.isArray(parsed.setCart) && callbacks.onSetCart) {
+    const validSet = parsed.setCart
+      .filter((item: any) => item && item.pizza_id && Number(item.quantity) > 0)
+      .map((item: any) => ({
+        pizzaId: String(item.pizza_id),
+        quantity: Number(item.quantity)
+      }));
+    callbacks.onSetCart(validSet);
+    cartModifiedByGemini = true;
+  } else {
+    // O bien si devuelve removePizzas + addPizzas individuales
+    if (Array.isArray(parsed.removePizzas) && parsed.removePizzas.length > 0 && callbacks.onRemovePizza) {
+      for (const rem of parsed.removePizzas) {
+        if (rem && rem.pizza_id) {
+          callbacks.onRemovePizza(
+            String(rem.pizza_id),
+            rem.quantity !== undefined && rem.quantity !== null ? Number(rem.quantity) : undefined
+          );
+          cartModifiedByGemini = true;
+        }
+      }
+    }
+
+    if (Array.isArray(parsed.addPizzas) && parsed.addPizzas.length > 0) {
+      for (const item of parsed.addPizzas) {
+        if (item && item.pizza_id) {
+          callbacks.onAddPizza(String(item.pizza_id), Number(item.quantity || 1));
+          cartModifiedByGemini = true;
+        }
+      }
+    }
+  }
+
+  if (parsed.city_id) callbacks.onSetCity(Number(parsed.city_id));
+  if (parsed.salechannel_id) callbacks.onSetChannel(Number(parsed.salechannel_id));
+  if (parsed.confirm === true) {
+    setTimeout(() => callbacks.onConfirmOrder(), 250);
+  }
+
+  // Respaldo adicional sobre la transcripción si Gemini no modificó el carrito pero el usuario dio una orden
+  const isIngredientQuestion =
+    transcript.toLowerCase().includes('ingrediente') ||
+    transcript.toLowerCase().includes('que lleva') ||
+    transcript.toLowerCase().includes('que trae') ||
+    transcript.toLowerCase().includes('que tiene');
+
+  if (!cartModifiedByGemini && !isIngredientQuestion && transcript) {
+    parseNaturalVoiceOrder(transcript, pizzas, [], [], callbacks);
+  }
+}
+
+function buildOrderAssistantSystemPrompt(
+  pizzas: PizzaItem[],
+  history: Array<{ role: string; text: string }>,
+  callbacks: VoiceActionCallbacks
+): string {
+  const fullCatalog = buildFullCatalogWithIngredients(pizzas);
+  const currentCartText = formatCurrentCartForPrompt(callbacks);
+  const historyText = history
+    .slice(-6)
+    .map((h) => `${h.role === 'user' ? 'Cliente' : 'Asistente'}: ${h.text}`)
+    .join('\n');
+
+  return `Eres el asistente inteligente de atención y pedidos de PizzaCorp.
+Conoces a la perfección las 32 variedades de pizza de nuestra tabla dim_pizaTipeID, incluyendo sus INGREDIENTES exactos, categorías, tamaños y precios.
+
+CATÁLOGO COMPLETO DE PIZZAS E INGREDIENTES (dim_pizaTipeID + dim_pizzas):
+${fullCatalog}
+
+Ciudades (city_id): 1=Chicago, 2=Houston, 3=Los Angeles, 4=New York.
+Canales (salechannel_id): 1=Domicilio, 2=Recogida, 3=Salon.
+
+ESTADO DEL PEDIDO ACTUAL EN EL CARRITO:
+${currentCartText}
+
+HISTORIAL RECIENTE DE LA CONVERSACIÓN:
+${historyText}
+
+REGLAS CRÍTICAS DE NEGOCIO Y ARREPENTIMIENTO / MODIFICACIÓN DEL PEDIDO:
+1. PREGUNTAS SOBRE INGREDIENTES O RECOMENDACIONES:
+   - Si el cliente pregunta qué ingredientes lleva una pizza o pide recomendaciones según ingredientes (ej. "¿qué lleva la hawaiana?", "¿qué pizzas tienen pollo o champiñones?", "¿cuál es vegetariana?"), respóndele con los ingredientes exactos en español usando la lista de arriba y deja "setCart": null, "addPizzas": [], "removePizzas": [].
+2. ARREPENTIMIENTO, CAMBIO DE OPINIÓN, REEMPLAZO O CAMBIO DE TAMAÑO/PRECIO:
+   - Si el cliente se arrepiente de lo que pidió antes o quiere cambiarlo (ejemplos:
+     * Pide "2 pizzas hawaianas", y luego dice "sabes qué, mejor que sean 2 de pollo medianas" -> Debes SACAR las 2 hawaianas y dejar SOLO las 2 de pollo medianas ("bbq_ckn_m").
+     * Luego dice "muy caro, dame 2 pizzas de pollo pequeñas" -> Debes SACAR las 2 de pollo medianas ("bbq_ckn_m") y dejar SOLO 2 de pollo pequeñas ("bbq_ckn_s").
+     * O si dice "quita la hawaiana", "saca una de pepperoni", "cámbiala por tamaño pequeña").
+   - Cuando ocurra cualquier reemplazo, cambio o arrepentimiento, usa el campo "setCart" indicando exactamente la lista final de pizzas que debe quedar en el carrito (ej: "setCart": [{"pizza_id": "bbq_ckn_s", "quantity": 2}]), o bien usa "removePizzas" para quitar la anterior y "addPizzas" para poner la nueva. ¡NUNCA dejes en el carrito una pizza que el cliente decidió cambiar por otra!
+   - Nota: Cuando el cliente diga simplemente "pizza de pollo" sin especificar cuál de las de pollo, usa por defecto Barbecue Chicken ("bbq_ckn_s", "bbq_ckn_m" o "bbq_ckn_l"). Si no especifica tamaño al pedir por primera vez, usa tamaño "M".
+3. AGREGAR PIZZAS ADICIONALES:
+   - Si el cliente solo quiere agregar más pizzas sin cancelar las anteriores (ej. "agrega también una napolitana grande"), usa "addPizzas": [{"pizza_id": "napolitana_l", "quantity": 1}] y deja "setCart": null.
+
+Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
+{
+  "userTranscript": "transcripción en español de lo que dijo el cliente",
+  "reply": "tu respuesta hablada breve (1 o 2 oraciones), cálida y natural en español mencionando los ingredientes o confirmando el cambio/precio",
+  "setCart": null,
+  "addPizzas": [],
+  "removePizzas": [],
+  "clearCart": false,
+  "city_id": null,
+  "salechannel_id": null,
+  "confirm": false
+}
+(Nota: Si usas "setCart", pon un arreglo como [{"pizza_id": "id_exacto", "quantity": 2}] con el contenido completo que debe quedar en el carrito; si no estás reemplazando todo el carrito, deja "setCart": null y usa "addPizzas" y/o "removePizzas").`;
+}
+
 /**
  * Envía el audio grabado aprovechando las DOS claves API:
  * - Clave 1 (Principal VITE_GEMINI_API_KEY_1): gemini-2.5-flash (2.2s) y gemini-3.5-flash-lite
@@ -472,37 +759,11 @@ async function processAudioTurnWithVerifiedGemini(
   apiKey: string,
   callbacks: VoiceActionCallbacks
 ): Promise<{ userTranscript: string; reply: string }> {
-  const samplePizzas = pizzas
-    .slice(0, 48)
-    .map((p) => `${p.pizza_id}: ${p.name} (${p.size}, $${p.price})`)
-    .join(' | ');
-
-  const historyText = history
-    .slice(-5)
-    .map((h) => `${h.role === 'user' ? 'Cliente' : 'Asistente'}: ${h.text}`)
-    .join('\n');
-
-  const systemPrompt = `Escucha atentamente el audio del cliente hablando en español. Eres el asistente de pedidos de PizzaCorp.
+  const systemPrompt = `Escucha atentamente el audio del cliente hablando en español.
 Si en el audio solo hay silencio, ruido de fondo o respiración sin palabras claras, devuelve exactamente:
-{"userTranscript": "", "reply": "", "addPizzas": [], "city_id": null, "salechannel_id": null, "confirm": false}
+{"userTranscript": "", "reply": "", "setCart": null, "addPizzas": [], "removePizzas": [], "clearCart": false, "city_id": null, "salechannel_id": null, "confirm": false}
 
-Si el cliente habló, transcribe lo que dijo y extrae su pedido según este catálogo:
-Ciudades (city_id): 1=Chicago, 2=Houston, 3=Los Angeles, 4=New York.
-Canales (salechannel_id): 1=Domicilio, 2=Recogida, 3=Salon.
-Catálogo de pizzas (pizza_id): ${samplePizzas}
-
-Historial reciente:
-${historyText}
-
-Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura:
-{
-  "userTranscript": "lo que dijo el cliente en español",
-  "reply": "tu respuesta hablada breve (1 o 2 oraciones) y amable en español",
-  "addPizzas": [{"pizza_id": "id_exacto_del_catalogo", "quantity": 1}],
-  "city_id": null,
-  "salechannel_id": null,
-  "confirm": false
-}`;
+${buildOrderAssistantSystemPrompt(pizzas, history, callbacks)}`;
 
   const keys = getDualApiKeys(apiKey, false);
   const attempts: Array<{ key: string; model: string }> = [];
@@ -551,40 +812,83 @@ Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura:
         const parsed = JSON.parse(cleaned);
 
         const transcript = String(parsed.userTranscript || '').trim();
-        // Si solo fue silencio o ruido ambiente, NO hablar ni interrumpir
         if (!transcript) {
           return { userTranscript: '', reply: '' };
         }
 
-        let addedByGemini = false;
-        if (Array.isArray(parsed.addPizzas) && parsed.addPizzas.length > 0) {
-          for (const item of parsed.addPizzas) {
-            if (item.pizza_id) {
-              callbacks.onAddPizza(String(item.pizza_id), Number(item.quantity || 1));
-              addedByGemini = true;
-            }
-          }
-        }
-        if (parsed.city_id) callbacks.onSetCity(Number(parsed.city_id));
-        if (parsed.salechannel_id) callbacks.onSetChannel(Number(parsed.salechannel_id));
-        if (parsed.confirm === true) {
-          setTimeout(() => callbacks.onConfirmOrder(), 250);
-        }
-
-        // Respaldo adicional sobre la transcripción por si dijo una pizza y Gemini no llenó addPizzas
-        if (!addedByGemini && transcript) {
-          parseNaturalVoiceOrder(transcript, pizzas, [], [], callbacks);
-        }
+        applyParsedGeminiCartActions(parsed, transcript, pizzas, callbacks);
 
         return {
           userTranscript: transcript,
-          reply: String(parsed.reply || 'Listo, he actualizado tu pedido. ¿Deseas agregar algo más o confirmar?')
+          reply: String(parsed.reply || 'Listo, he actualizado tu pedido. ¿Deseas algo más o confirmar?')
         };
       }
     } catch {}
   }
 
   return { userTranscript: '', reply: '' };
+}
+
+/**
+ * Procesa también comandos escritos por texto con la misma inteligencia de ingredientes,
+ * arrepentimiento, reemplazo de ítems y estado en tiempo real del carrito.
+ */
+export async function processTextTurnWithVerifiedGemini(
+  userText: string,
+  history: Array<{ role: string; text: string }>,
+  pizzas: PizzaItem[],
+  apiKey: string,
+  callbacks: VoiceActionCallbacks
+): Promise<string> {
+  const prompt = `${buildOrderAssistantSystemPrompt(pizzas, history, callbacks)}
+
+MENSAJE ESCRITO POR EL CLIENTE:
+"${userText}"`;
+
+  const keys = getDualApiKeys(apiKey, false);
+  const attempts: Array<{ key: string; model: string }> = [];
+  if (keys[0]) {
+    attempts.push({ key: keys[0], model: 'gemini-2.5-flash' });
+    attempts.push({ key: keys[0], model: 'gemini-3.5-flash-lite' });
+  }
+  if (keys[1]) {
+    attempts.push({ key: keys[1], model: 'gemini-3.5-flash-lite' });
+    attempts.push({ key: keys[1], model: 'gemini-3.6-flash' });
+  }
+
+  for (const { key, model } of attempts) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.2,
+              responseMimeType: 'application/json'
+            }
+          })
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+        const cleaned = rawText.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+
+        applyParsedGeminiCartActions(parsed, userText, pizzas, callbacks);
+        if (parsed.reply) {
+          return String(parsed.reply);
+        }
+      }
+    } catch {}
+  }
+
+  const fallback = parseNaturalVoiceOrder(userText, pizzas, [], [], callbacks);
+  return fallback.reply || 'Dime qué pizza deseas agregar, cambiar o consultar sus ingredientes.';
 }
 
 /**

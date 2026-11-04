@@ -1,5 +1,6 @@
 import { FactVentaRow } from '../types';
 import { getDualApiKeys } from './geminiLiveService';
+import rawModelData from '../data/pizzaModelData.json';
 
 export interface BICopilotContext {
   totalHistoricalRows: number;
@@ -23,6 +24,10 @@ export interface BICopilotResponse {
 }
 
 function buildContextSummaryText(ctx: BICopilotContext): string {
+  const pizzaTypesText = (rawModelData.pizzaTypes || [])
+    .map((pt: any) => `[${pt.pizza_type_id}] ${pt.name} (${pt.category}): ${pt.ingredients}`)
+    .join(' | ');
+
   return `- Total filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalHistoricalRows.toLocaleString()} históricas + ${ctx.liveOrdersCount} nuevas hoy)
 - Ingresos Totales Acumulados: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD (Nuevas hoy: $${ctx.liveRevenue.toFixed(2)} USD)
 - Total Unidades Vendidas: ${ctx.totalQuantity.toLocaleString()} pizzas
@@ -32,7 +37,8 @@ function buildContextSummaryText(ctx: BICopilotContext): string {
 - Ventas por Categoría (dim_pizaTipeID): ${JSON.stringify(ctx.byCategory)}
 - Ventas por Tamaño (dim_pizzas): ${JSON.stringify(ctx.bySize)}
 - Top 5 Pizzas Más Vendidas: ${JSON.stringify(ctx.topPizzas.slice(0, 5))}
-- Top 5 Pizzas Menos Vendidas: ${JSON.stringify(ctx.bottomPizzas.slice(0, 5))}`;
+- Top 5 Pizzas Menos Vendidas: ${JSON.stringify(ctx.bottomPizzas.slice(0, 5))}
+- Catálogo e Ingredientes de las 32 Variedades (dim_pizaTipeID): ${pizzaTypesText}`;
 }
 
 export function buildLocalFallbackAnswer(question: string, ctx: BICopilotContext): { answer: string; spokenSummary: string } {
@@ -51,6 +57,29 @@ export function buildLocalFallbackAnswer(question: string, ctx: BICopilotContext
   const topChannel = channelsSorted[0];
   const topPizza = ctx.topPizzas[0];
   const worstPizza = ctx.bottomPizzas[0];
+
+  if (q.includes('ingrediente') || q.includes('que lleva') || q.includes('que trae') || q.includes('receta')) {
+    const types = rawModelData.pizzaTypes || [];
+    const found = types.find(
+      (pt: any) =>
+        q.includes(pt.pizza_type_id.toLowerCase()) ||
+        q.includes(pt.name.toLowerCase().replace('the ', '').replace(' pizza', ''))
+    );
+    if (found) {
+      return {
+        answer: `Ficha Técnica en dim_pizaTipeID:\n• Pizza: ${found.name} [${found.pizza_type_id}]\n• Categoría: ${found.category}\n• Ingredientes: ${found.ingredients}`,
+        spokenSummary: `La pizza ${found.name} pertenece a la categoría ${found.category} y sus ingredientes son: ${found.ingredients}.`
+      };
+    }
+    const sampleList = types
+      .slice(0, 8)
+      .map((pt: any) => `• ${pt.name} (${pt.category}): ${pt.ingredients}`)
+      .join('\n');
+    return {
+      answer: `Catálogo de Ingredientes (dim_pizaTipeID — 32 variedades registradas):\n${sampleList}\n\nPuedes preguntarme por cualquier variedad específica del catálogo.`,
+      spokenSummary: `Contamos con las recetas e ingredientes exactos de las 32 variedades en la tabla dim_pizaTipeID.`
+    };
+  }
 
   if (q.includes('ciudad') || q.includes('chicago') || q.includes('houston') || q.includes('angeles') || q.includes('york') || q.includes('sede') || q.includes('donde')) {
     const breakdown = citiesSorted
@@ -121,7 +150,7 @@ export function buildLocalFallbackAnswer(question: string, ctx: BICopilotContext
   }
 
   return {
-    answer: `Resumen Ejecutivo del Modelo (Excel & Power BI):\n• Ingresos Totales: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD\n• Filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalQuantity.toLocaleString()} pizzas)\n• Ciudad Líder: ${topCity[0]} ($${topCity[1].revenue.toLocaleString('en-US')})\n• Canal Principal: ${topChannel[0]} ($${topChannel[1].revenue.toLocaleString('en-US')})\n• Pizza #1: ${topPizza.name} (${topPizza.size}) — $${topPizza.revenue.toLocaleString('en-US')}`,
+    answer: `Resumen Ejecutivo del Modelo de Datos (Excel):\n• Ingresos Totales: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD\n• Filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalQuantity.toLocaleString()} pizzas)\n• Ciudad Líder: ${topCity[0]} ($${topCity[1].revenue.toLocaleString('en-US')})\n• Canal Principal: ${topChannel[0]} ($${topChannel[1].revenue.toLocaleString('en-US')})\n• Pizza #1: ${topPizza.name} (${topPizza.size}) — $${topPizza.revenue.toLocaleString('en-US')}`,
     spokenSummary: `El modelo registra ingresos totales por ${Math.round(ctx.totalRevenue).toLocaleString('es-CO')} dólares en ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString('es-CO')} filas, liderado por la ciudad de ${topCity[0]}.`
   };
 }
@@ -131,12 +160,10 @@ export async function askBICopilot(
   ctx: BICopilotContext,
   apiKey?: string
 ): Promise<BICopilotResponse> {
-  // En el Admin BI usamos primero la clave secundaria para descargar la clave principal (que atiende TTS y voz en vivo),
-  // y si falla, conmuta en milisegundos a la clave principal.
   const keys = getDualApiKeys(apiKey, true);
 
   if (keys.length > 0) {
-    const prompt = `Eres el Analista IA de Inteligencia de Negocios de PizzaCorp conectado al Excel y Power BI.
+    const prompt = `Eres el Analista Ejecutivo IA de PizzaCorp conectado directamente al modelo dimensional en Excel / Google Sheets (fact_ventas, dim_pizzas, dim_pizaTipeID, dim_city, dim_saleChannel, dim_fecha).
 Datos exactos en tiempo real:
 ${buildContextSummaryText(ctx)}
 
@@ -144,7 +171,7 @@ Pregunta del administrador: "${question}"
 
 Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 {
-  "answer": "Respuesta ejecutiva bien formateada con cifras exactas y una recomendación breve.",
+  "answer": "Respuesta ejecutiva bien formateada con cifras o ingredientes exactos del modelo y una recomendación breve.",
   "spokenSummary": "Resumen hablado natural de máximo 2 oraciones breves en español (sin símbolos ni listas) para leer en voz alta rápidamente."
 }`;
 
@@ -206,7 +233,7 @@ export async function askBICopilotByAudio(
   const keys = getDualApiKeys(apiKey, false);
   if (keys.length === 0) return null;
 
-  const prompt = `Escucha el audio del administrador preguntando sobre el negocio de pizzas y el tablero de Power BI / Excel.
+  const prompt = `Escucha el audio del administrador preguntando sobre el negocio de pizzas, ventas, ciudades, canales o ingredientes del modelo en Excel.
 Si el audio solo tiene silencio o ruido sin palabras, devuelve:
 {"userQuestion": "", "answer": "", "spokenSummary": ""}
 
@@ -216,7 +243,7 @@ ${buildContextSummaryText(ctx)}
 Devuelve ÚNICAMENTE un objeto JSON válido con:
 {
   "userQuestion": "transcripción exacta en español de la pregunta que hizo el usuario",
-  "answer": "respuesta ejecutiva clara con cifras exactas del modelo y recomendación",
+  "answer": "respuesta ejecutiva clara con cifras o ingredientes exactos del modelo y recomendación",
   "spokenSummary": "resumen hablado directo en 1 o 2 frases cortas sin símbolos para decir por voz"
 }`;
 
