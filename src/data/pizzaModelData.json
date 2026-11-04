@@ -1,0 +1,1876 @@
+{
+  "summary": {
+    "totalHistoricalRows": 56864,
+    "rawSheetRows": 56864,
+    "lastOrderId": 24957,
+    "lastExcelDate": 45657,
+    "totalQuantity": 57977,
+    "totalRevenue": 730010.8
+  },
+  "cities": [
+    {
+      "city_id": 1,
+      "nombreCiudad": "Chicago",
+      "direccion": "742 N Michigan Ave",
+      "state_id": 13,
+      "state_name": "Illinois",
+      "state_code": "IL"
+    },
+    {
+      "city_id": 2,
+      "nombreCiudad": "Houston",
+      "direccion": "1850 Westheimer Rd",
+      "state_id": 43,
+      "state_name": "Texas",
+      "state_code": "TX"
+    },
+    {
+      "city_id": 3,
+      "nombreCiudad": "Los Angeles",
+      "direccion": "4250 Wilshire Blvd",
+      "state_id": 5,
+      "state_name": "California",
+      "state_code": "CA"
+    },
+    {
+      "city_id": 4,
+      "nombreCiudad": "New York",
+      "direccion": "350 5th Ave",
+      "state_id": 32,
+      "state_name": "New York",
+      "state_code": "NY"
+    }
+  ],
+  "channels": [
+    {
+      "salechannel_id": 1,
+      "nombreChannel": "Domicilio"
+    },
+    {
+      "salechannel_id": 2,
+      "nombreChannel": "Recogida"
+    },
+    {
+      "salechannel_id": 3,
+      "nombreChannel": "Salon"
+    }
+  ],
+  "pizzaTypes": [
+    {
+      "pizza_type_id": "bbq_ckn",
+      "name": "The Barbecue Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Barbecued Chicken, Red Peppers, Green Peppers, Tomatoes, Red Onions, Barbecue Sauce"
+    },
+    {
+      "pizza_type_id": "cali_ckn",
+      "name": "The California Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Artichoke, Spinach, Garlic, Jalapeno Peppers, Fontina Cheese, Gouda Cheese"
+    },
+    {
+      "pizza_type_id": "ckn_alfredo",
+      "name": "The Chicken Alfredo Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Red Onions, Red Peppers, Mushrooms, Asiago Cheese, Alfredo Sauce"
+    },
+    {
+      "pizza_type_id": "ckn_pesto",
+      "name": "The Chicken Pesto Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Spinach, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_type_id": "southw_ckn",
+      "name": "The Southwest Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Red Onions, Jalapeno Peppers, Corn, Cilantro, Chipotle Sauce"
+    },
+    {
+      "pizza_type_id": "thai_ckn",
+      "name": "The Thai Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Pineapple, Tomatoes, Red Peppers, Thai Sweet Chilli Sauce"
+    },
+    {
+      "pizza_type_id": "big_meat",
+      "name": "The Big Meat Pizza",
+      "category": "Classic",
+      "ingredients": "Bacon, Pepperoni, Italian Sausage, Chorizo Sausage"
+    },
+    {
+      "pizza_type_id": "classic_dlx",
+      "name": "The Classic Deluxe Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Red Onions, Red Peppers, Bacon"
+    },
+    {
+      "pizza_type_id": "hawaiian",
+      "name": "The Hawaiian Pizza",
+      "category": "Classic",
+      "ingredients": "Sliced Ham, Pineapple, Mozzarella Cheese"
+    },
+    {
+      "pizza_type_id": "ital_cpcllo",
+      "name": "The Italian Capocollo Pizza",
+      "category": "Classic",
+      "ingredients": "Capocollo, Red Peppers, Tomatoes, Goat Cheese, Garlic, Oregano"
+    },
+    {
+      "pizza_type_id": "napolitana",
+      "name": "The Napolitana Pizza",
+      "category": "Classic",
+      "ingredients": "Tomatoes, Anchovies, Green Olives, Red Onions, Garlic"
+    },
+    {
+      "pizza_type_id": "pep_msh_pep",
+      "name": "The Pepperoni, Mushroom, and Peppers Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Green Peppers"
+    },
+    {
+      "pizza_type_id": "pepperoni",
+      "name": "The Pepperoni Pizza",
+      "category": "Classic",
+      "ingredients": "Mozzarella Cheese, Pepperoni"
+    },
+    {
+      "pizza_type_id": "the_greek",
+      "name": "The Greek Pizza",
+      "category": "Classic",
+      "ingredients": "Kalamata Olives, Feta Cheese, Tomatoes, Garlic, Beef Chuck Roast, Red Onions"
+    },
+    {
+      "pizza_type_id": "brie_carre",
+      "name": "The Brie Carre Pizza",
+      "category": "Supreme",
+      "ingredients": "Brie Carre Cheese, Prosciutto, Caramelized Onions, Pears, Thyme, Garlic"
+    },
+    {
+      "pizza_type_id": "calabrese",
+      "name": "The Calabrese Pizza",
+      "category": "Supreme",
+      "ingredients": "‘Nduja Salami, Pancetta, Tomatoes, Red Onions, Friggitello Peppers, Garlic"
+    },
+    {
+      "pizza_type_id": "ital_supr",
+      "name": "The Italian Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Calabrese Salami, Capocollo, Tomatoes, Red Onions, Green Olives, Garlic"
+    },
+    {
+      "pizza_type_id": "peppr_salami",
+      "name": "The Pepper Salami Pizza",
+      "category": "Supreme",
+      "ingredients": "Genoa Salami, Capocollo, Pepperoni, Tomatoes, Asiago Cheese, Garlic"
+    },
+    {
+      "pizza_type_id": "prsc_argla",
+      "name": "The Prosciutto and Arugula Pizza",
+      "category": "Supreme",
+      "ingredients": "Prosciutto di San Daniele, Arugula, Mozzarella Cheese"
+    },
+    {
+      "pizza_type_id": "sicilian",
+      "name": "The Sicilian Pizza",
+      "category": "Supreme",
+      "ingredients": "Coarse Sicilian Salami, Tomatoes, Green Olives, Luganega Sausage, Onions, Garlic"
+    },
+    {
+      "pizza_type_id": "soppressata",
+      "name": "The Soppressata Pizza",
+      "category": "Supreme",
+      "ingredients": "Soppressata Salami, Fontina Cheese, Mozzarella Cheese, Mushrooms, Garlic"
+    },
+    {
+      "pizza_type_id": "spicy_ital",
+      "name": "The Spicy Italian Pizza",
+      "category": "Supreme",
+      "ingredients": "Capocollo, Tomatoes, Goat Cheese, Artichokes, Peperoncini verdi, Garlic"
+    },
+    {
+      "pizza_type_id": "spinach_supr",
+      "name": "The Spinach Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Spinach, Red Onions, Pepperoni, Tomatoes, Artichokes, Kalamata Olives, Garlic, Asiago Cheese"
+    },
+    {
+      "pizza_type_id": "five_cheese",
+      "name": "The Five Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Mozzarella Cheese, Provolone Cheese, Smoked Gouda Cheese, Romano Cheese, Blue Cheese, Garlic"
+    },
+    {
+      "pizza_type_id": "four_cheese",
+      "name": "The Four Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Ricotta Cheese, Gorgonzola Piccante Cheese, Mozzarella Cheese, Parmigiano Reggiano Cheese, Garlic"
+    },
+    {
+      "pizza_type_id": "green_garden",
+      "name": "The Green Garden Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Tomatoes, Green Olives, Feta Cheese"
+    },
+    {
+      "pizza_type_id": "ital_veggie",
+      "name": "The Italian Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Eggplant, Artichokes, Tomatoes, Zucchini, Red Peppers, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_type_id": "mediterraneo",
+      "name": "The Mediterranean Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Kalamata Olives, Sun-dried Tomatoes, Feta Cheese, Plum Tomatoes, Red Onions"
+    },
+    {
+      "pizza_type_id": "mexicana",
+      "name": "The Mexicana Pizza",
+      "category": "Veggie",
+      "ingredients": "Tomatoes, Red Peppers, Jalapeno Peppers, Red Onions, Cilantro, Corn, Chipotle Sauce, Garlic"
+    },
+    {
+      "pizza_type_id": "spin_pesto",
+      "name": "The Spinach Pesto Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Tomatoes, Sun-dried Tomatoes, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_type_id": "spinach_fet",
+      "name": "The Spinach and Feta Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Red Onions, Feta Cheese, Garlic"
+    },
+    {
+      "pizza_type_id": "veggie_veg",
+      "name": "The Vegetables + Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Mushrooms, Tomatoes, Red Peppers, Green Peppers, Red Onions, Zucchini, Spinach, Garlic"
+    }
+  ],
+  "pizzas": [
+    {
+      "pizza_id": "bbq_ckn_s",
+      "pizza_type_id": "bbq_ckn",
+      "size": "S",
+      "raw_price": 1275,
+      "price": 12.75,
+      "name": "The Barbecue Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Barbecued Chicken, Red Peppers, Green Peppers, Tomatoes, Red Onions, Barbecue Sauce"
+    },
+    {
+      "pizza_id": "bbq_ckn_m",
+      "pizza_type_id": "bbq_ckn",
+      "size": "M",
+      "raw_price": 1675,
+      "price": 16.75,
+      "name": "The Barbecue Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Barbecued Chicken, Red Peppers, Green Peppers, Tomatoes, Red Onions, Barbecue Sauce"
+    },
+    {
+      "pizza_id": "bbq_ckn_l",
+      "pizza_type_id": "bbq_ckn",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Barbecue Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Barbecued Chicken, Red Peppers, Green Peppers, Tomatoes, Red Onions, Barbecue Sauce"
+    },
+    {
+      "pizza_id": "cali_ckn_s",
+      "pizza_type_id": "cali_ckn",
+      "size": "S",
+      "raw_price": 1275,
+      "price": 12.75,
+      "name": "The California Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Artichoke, Spinach, Garlic, Jalapeno Peppers, Fontina Cheese, Gouda Cheese"
+    },
+    {
+      "pizza_id": "cali_ckn_m",
+      "pizza_type_id": "cali_ckn",
+      "size": "M",
+      "raw_price": 1675,
+      "price": 16.75,
+      "name": "The California Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Artichoke, Spinach, Garlic, Jalapeno Peppers, Fontina Cheese, Gouda Cheese"
+    },
+    {
+      "pizza_id": "cali_ckn_l",
+      "pizza_type_id": "cali_ckn",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The California Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Artichoke, Spinach, Garlic, Jalapeno Peppers, Fontina Cheese, Gouda Cheese"
+    },
+    {
+      "pizza_id": "ckn_alfredo_s",
+      "pizza_type_id": "ckn_alfredo",
+      "size": "S",
+      "raw_price": 1275,
+      "price": 12.75,
+      "name": "The Chicken Alfredo Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Red Onions, Red Peppers, Mushrooms, Asiago Cheese, Alfredo Sauce"
+    },
+    {
+      "pizza_id": "ckn_alfredo_m",
+      "pizza_type_id": "ckn_alfredo",
+      "size": "M",
+      "raw_price": 1675,
+      "price": 16.75,
+      "name": "The Chicken Alfredo Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Red Onions, Red Peppers, Mushrooms, Asiago Cheese, Alfredo Sauce"
+    },
+    {
+      "pizza_id": "ckn_alfredo_l",
+      "pizza_type_id": "ckn_alfredo",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Chicken Alfredo Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Red Onions, Red Peppers, Mushrooms, Asiago Cheese, Alfredo Sauce"
+    },
+    {
+      "pizza_id": "ckn_pesto_s",
+      "pizza_type_id": "ckn_pesto",
+      "size": "S",
+      "raw_price": 1275,
+      "price": 12.75,
+      "name": "The Chicken Pesto Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Spinach, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "ckn_pesto_m",
+      "pizza_type_id": "ckn_pesto",
+      "size": "M",
+      "raw_price": 1675,
+      "price": 16.75,
+      "name": "The Chicken Pesto Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Spinach, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "ckn_pesto_l",
+      "pizza_type_id": "ckn_pesto",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Chicken Pesto Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Spinach, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "southw_ckn_s",
+      "pizza_type_id": "southw_ckn",
+      "size": "S",
+      "raw_price": 1275,
+      "price": 12.75,
+      "name": "The Southwest Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Red Onions, Jalapeno Peppers, Corn, Cilantro, Chipotle Sauce"
+    },
+    {
+      "pizza_id": "southw_ckn_m",
+      "pizza_type_id": "southw_ckn",
+      "size": "M",
+      "raw_price": 1675,
+      "price": 16.75,
+      "name": "The Southwest Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Red Onions, Jalapeno Peppers, Corn, Cilantro, Chipotle Sauce"
+    },
+    {
+      "pizza_id": "southw_ckn_l",
+      "pizza_type_id": "southw_ckn",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Southwest Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Tomatoes, Red Peppers, Red Onions, Jalapeno Peppers, Corn, Cilantro, Chipotle Sauce"
+    },
+    {
+      "pizza_id": "thai_ckn_s",
+      "pizza_type_id": "thai_ckn",
+      "size": "S",
+      "raw_price": 1275,
+      "price": 12.75,
+      "name": "The Thai Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Pineapple, Tomatoes, Red Peppers, Thai Sweet Chilli Sauce"
+    },
+    {
+      "pizza_id": "thai_ckn_m",
+      "pizza_type_id": "thai_ckn",
+      "size": "M",
+      "raw_price": 1675,
+      "price": 16.75,
+      "name": "The Thai Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Pineapple, Tomatoes, Red Peppers, Thai Sweet Chilli Sauce"
+    },
+    {
+      "pizza_id": "thai_ckn_l",
+      "pizza_type_id": "thai_ckn",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Thai Chicken Pizza",
+      "category": "Chicken",
+      "ingredients": "Chicken, Pineapple, Tomatoes, Red Peppers, Thai Sweet Chilli Sauce"
+    },
+    {
+      "pizza_id": "big_meat_s",
+      "pizza_type_id": "big_meat",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Big Meat Pizza",
+      "category": "Classic",
+      "ingredients": "Bacon, Pepperoni, Italian Sausage, Chorizo Sausage"
+    },
+    {
+      "pizza_id": "big_meat_m",
+      "pizza_type_id": "big_meat",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Big Meat Pizza",
+      "category": "Classic",
+      "ingredients": "Bacon, Pepperoni, Italian Sausage, Chorizo Sausage"
+    },
+    {
+      "pizza_id": "big_meat_l",
+      "pizza_type_id": "big_meat",
+      "size": "L",
+      "raw_price": 205,
+      "price": 2.05,
+      "name": "The Big Meat Pizza",
+      "category": "Classic",
+      "ingredients": "Bacon, Pepperoni, Italian Sausage, Chorizo Sausage"
+    },
+    {
+      "pizza_id": "classic_dlx_s",
+      "pizza_type_id": "classic_dlx",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Classic Deluxe Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Red Onions, Red Peppers, Bacon"
+    },
+    {
+      "pizza_id": "classic_dlx_m",
+      "pizza_type_id": "classic_dlx",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Classic Deluxe Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Red Onions, Red Peppers, Bacon"
+    },
+    {
+      "pizza_id": "classic_dlx_l",
+      "pizza_type_id": "classic_dlx",
+      "size": "L",
+      "raw_price": 205,
+      "price": 2.05,
+      "name": "The Classic Deluxe Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Red Onions, Red Peppers, Bacon"
+    },
+    {
+      "pizza_id": "hawaiian_s",
+      "pizza_type_id": "hawaiian",
+      "size": "S",
+      "raw_price": 105,
+      "price": 1.05,
+      "name": "The Hawaiian Pizza",
+      "category": "Classic",
+      "ingredients": "Sliced Ham, Pineapple, Mozzarella Cheese"
+    },
+    {
+      "pizza_id": "hawaiian_m",
+      "pizza_type_id": "hawaiian",
+      "size": "M",
+      "raw_price": 1325,
+      "price": 13.25,
+      "name": "The Hawaiian Pizza",
+      "category": "Classic",
+      "ingredients": "Sliced Ham, Pineapple, Mozzarella Cheese"
+    },
+    {
+      "pizza_id": "hawaiian_l",
+      "pizza_type_id": "hawaiian",
+      "size": "L",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Hawaiian Pizza",
+      "category": "Classic",
+      "ingredients": "Sliced Ham, Pineapple, Mozzarella Cheese"
+    },
+    {
+      "pizza_id": "ital_cpcllo_s",
+      "pizza_type_id": "ital_cpcllo",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Italian Capocollo Pizza",
+      "category": "Classic",
+      "ingredients": "Capocollo, Red Peppers, Tomatoes, Goat Cheese, Garlic, Oregano"
+    },
+    {
+      "pizza_id": "ital_cpcllo_m",
+      "pizza_type_id": "ital_cpcllo",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Italian Capocollo Pizza",
+      "category": "Classic",
+      "ingredients": "Capocollo, Red Peppers, Tomatoes, Goat Cheese, Garlic, Oregano"
+    },
+    {
+      "pizza_id": "ital_cpcllo_l",
+      "pizza_type_id": "ital_cpcllo",
+      "size": "L",
+      "raw_price": 205,
+      "price": 2.05,
+      "name": "The Italian Capocollo Pizza",
+      "category": "Classic",
+      "ingredients": "Capocollo, Red Peppers, Tomatoes, Goat Cheese, Garlic, Oregano"
+    },
+    {
+      "pizza_id": "napolitana_s",
+      "pizza_type_id": "napolitana",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Napolitana Pizza",
+      "category": "Classic",
+      "ingredients": "Tomatoes, Anchovies, Green Olives, Red Onions, Garlic"
+    },
+    {
+      "pizza_id": "napolitana_m",
+      "pizza_type_id": "napolitana",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Napolitana Pizza",
+      "category": "Classic",
+      "ingredients": "Tomatoes, Anchovies, Green Olives, Red Onions, Garlic"
+    },
+    {
+      "pizza_id": "napolitana_l",
+      "pizza_type_id": "napolitana",
+      "size": "L",
+      "raw_price": 205,
+      "price": 2.05,
+      "name": "The Napolitana Pizza",
+      "category": "Classic",
+      "ingredients": "Tomatoes, Anchovies, Green Olives, Red Onions, Garlic"
+    },
+    {
+      "pizza_id": "pep_msh_pep_s",
+      "pizza_type_id": "pep_msh_pep",
+      "size": "S",
+      "raw_price": 11,
+      "price": 11.0,
+      "name": "The Pepperoni, Mushroom, and Peppers Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Green Peppers"
+    },
+    {
+      "pizza_id": "pep_msh_pep_m",
+      "pizza_type_id": "pep_msh_pep",
+      "size": "M",
+      "raw_price": 145,
+      "price": 1.45,
+      "name": "The Pepperoni, Mushroom, and Peppers Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Green Peppers"
+    },
+    {
+      "pizza_id": "pep_msh_pep_l",
+      "pizza_type_id": "pep_msh_pep",
+      "size": "L",
+      "raw_price": 175,
+      "price": 1.75,
+      "name": "The Pepperoni, Mushroom, and Peppers Pizza",
+      "category": "Classic",
+      "ingredients": "Pepperoni, Mushrooms, Green Peppers"
+    },
+    {
+      "pizza_id": "pepperoni_s",
+      "pizza_type_id": "pepperoni",
+      "size": "S",
+      "raw_price": 975,
+      "price": 9.75,
+      "name": "The Pepperoni Pizza",
+      "category": "Classic",
+      "ingredients": "Mozzarella Cheese, Pepperoni"
+    },
+    {
+      "pizza_id": "pepperoni_m",
+      "pizza_type_id": "pepperoni",
+      "size": "M",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Pepperoni Pizza",
+      "category": "Classic",
+      "ingredients": "Mozzarella Cheese, Pepperoni"
+    },
+    {
+      "pizza_id": "pepperoni_l",
+      "pizza_type_id": "pepperoni",
+      "size": "L",
+      "raw_price": 1525,
+      "price": 15.25,
+      "name": "The Pepperoni Pizza",
+      "category": "Classic",
+      "ingredients": "Mozzarella Cheese, Pepperoni"
+    },
+    {
+      "pizza_id": "the_greek_s",
+      "pizza_type_id": "the_greek",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Greek Pizza",
+      "category": "Classic",
+      "ingredients": "Kalamata Olives, Feta Cheese, Tomatoes, Garlic, Beef Chuck Roast, Red Onions"
+    },
+    {
+      "pizza_id": "the_greek_m",
+      "pizza_type_id": "the_greek",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Greek Pizza",
+      "category": "Classic",
+      "ingredients": "Kalamata Olives, Feta Cheese, Tomatoes, Garlic, Beef Chuck Roast, Red Onions"
+    },
+    {
+      "pizza_id": "the_greek_l",
+      "pizza_type_id": "the_greek",
+      "size": "L",
+      "raw_price": 205,
+      "price": 2.05,
+      "name": "The Greek Pizza",
+      "category": "Classic",
+      "ingredients": "Kalamata Olives, Feta Cheese, Tomatoes, Garlic, Beef Chuck Roast, Red Onions"
+    },
+    {
+      "pizza_id": "the_greek_xl",
+      "pizza_type_id": "the_greek",
+      "size": "XL",
+      "raw_price": 255,
+      "price": 2.55,
+      "name": "The Greek Pizza",
+      "category": "Classic",
+      "ingredients": "Kalamata Olives, Feta Cheese, Tomatoes, Garlic, Beef Chuck Roast, Red Onions"
+    },
+    {
+      "pizza_id": "the_greek_xxl",
+      "pizza_type_id": "the_greek",
+      "size": "XXL",
+      "raw_price": 3595,
+      "price": 35.95,
+      "name": "The Greek Pizza",
+      "category": "Classic",
+      "ingredients": "Kalamata Olives, Feta Cheese, Tomatoes, Garlic, Beef Chuck Roast, Red Onions"
+    },
+    {
+      "pizza_id": "brie_carre_s",
+      "pizza_type_id": "brie_carre",
+      "size": "S",
+      "raw_price": 2365,
+      "price": 23.65,
+      "name": "The Brie Carre Pizza",
+      "category": "Supreme",
+      "ingredients": "Brie Carre Cheese, Prosciutto, Caramelized Onions, Pears, Thyme, Garlic"
+    },
+    {
+      "pizza_id": "calabrese_s",
+      "pizza_type_id": "calabrese",
+      "size": "S",
+      "raw_price": 1225,
+      "price": 12.25,
+      "name": "The Calabrese Pizza",
+      "category": "Supreme",
+      "ingredients": "‘Nduja Salami, Pancetta, Tomatoes, Red Onions, Friggitello Peppers, Garlic"
+    },
+    {
+      "pizza_id": "calabrese_m",
+      "pizza_type_id": "calabrese",
+      "size": "M",
+      "raw_price": 1625,
+      "price": 16.25,
+      "name": "The Calabrese Pizza",
+      "category": "Supreme",
+      "ingredients": "‘Nduja Salami, Pancetta, Tomatoes, Red Onions, Friggitello Peppers, Garlic"
+    },
+    {
+      "pizza_id": "calabrese_l",
+      "pizza_type_id": "calabrese",
+      "size": "L",
+      "raw_price": 2025,
+      "price": 20.25,
+      "name": "The Calabrese Pizza",
+      "category": "Supreme",
+      "ingredients": "‘Nduja Salami, Pancetta, Tomatoes, Red Onions, Friggitello Peppers, Garlic"
+    },
+    {
+      "pizza_id": "ital_supr_s",
+      "pizza_type_id": "ital_supr",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Italian Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Calabrese Salami, Capocollo, Tomatoes, Red Onions, Green Olives, Garlic"
+    },
+    {
+      "pizza_id": "ital_supr_m",
+      "pizza_type_id": "ital_supr",
+      "size": "M",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Italian Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Calabrese Salami, Capocollo, Tomatoes, Red Onions, Green Olives, Garlic"
+    },
+    {
+      "pizza_id": "ital_supr_l",
+      "pizza_type_id": "ital_supr",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Italian Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Calabrese Salami, Capocollo, Tomatoes, Red Onions, Green Olives, Garlic"
+    },
+    {
+      "pizza_id": "peppr_salami_s",
+      "pizza_type_id": "peppr_salami",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Pepper Salami Pizza",
+      "category": "Supreme",
+      "ingredients": "Genoa Salami, Capocollo, Pepperoni, Tomatoes, Asiago Cheese, Garlic"
+    },
+    {
+      "pizza_id": "peppr_salami_m",
+      "pizza_type_id": "peppr_salami",
+      "size": "M",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Pepper Salami Pizza",
+      "category": "Supreme",
+      "ingredients": "Genoa Salami, Capocollo, Pepperoni, Tomatoes, Asiago Cheese, Garlic"
+    },
+    {
+      "pizza_id": "peppr_salami_l",
+      "pizza_type_id": "peppr_salami",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Pepper Salami Pizza",
+      "category": "Supreme",
+      "ingredients": "Genoa Salami, Capocollo, Pepperoni, Tomatoes, Asiago Cheese, Garlic"
+    },
+    {
+      "pizza_id": "prsc_argla_s",
+      "pizza_type_id": "prsc_argla",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Prosciutto and Arugula Pizza",
+      "category": "Supreme",
+      "ingredients": "Prosciutto di San Daniele, Arugula, Mozzarella Cheese"
+    },
+    {
+      "pizza_id": "prsc_argla_m",
+      "pizza_type_id": "prsc_argla",
+      "size": "M",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Prosciutto and Arugula Pizza",
+      "category": "Supreme",
+      "ingredients": "Prosciutto di San Daniele, Arugula, Mozzarella Cheese"
+    },
+    {
+      "pizza_id": "prsc_argla_l",
+      "pizza_type_id": "prsc_argla",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Prosciutto and Arugula Pizza",
+      "category": "Supreme",
+      "ingredients": "Prosciutto di San Daniele, Arugula, Mozzarella Cheese"
+    },
+    {
+      "pizza_id": "sicilian_s",
+      "pizza_type_id": "sicilian",
+      "size": "S",
+      "raw_price": 1225,
+      "price": 12.25,
+      "name": "The Sicilian Pizza",
+      "category": "Supreme",
+      "ingredients": "Coarse Sicilian Salami, Tomatoes, Green Olives, Luganega Sausage, Onions, Garlic"
+    },
+    {
+      "pizza_id": "sicilian_m",
+      "pizza_type_id": "sicilian",
+      "size": "M",
+      "raw_price": 1625,
+      "price": 16.25,
+      "name": "The Sicilian Pizza",
+      "category": "Supreme",
+      "ingredients": "Coarse Sicilian Salami, Tomatoes, Green Olives, Luganega Sausage, Onions, Garlic"
+    },
+    {
+      "pizza_id": "sicilian_l",
+      "pizza_type_id": "sicilian",
+      "size": "L",
+      "raw_price": 2025,
+      "price": 20.25,
+      "name": "The Sicilian Pizza",
+      "category": "Supreme",
+      "ingredients": "Coarse Sicilian Salami, Tomatoes, Green Olives, Luganega Sausage, Onions, Garlic"
+    },
+    {
+      "pizza_id": "soppressata_s",
+      "pizza_type_id": "soppressata",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Soppressata Pizza",
+      "category": "Supreme",
+      "ingredients": "Soppressata Salami, Fontina Cheese, Mozzarella Cheese, Mushrooms, Garlic"
+    },
+    {
+      "pizza_id": "soppressata_m",
+      "pizza_type_id": "soppressata",
+      "size": "M",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Soppressata Pizza",
+      "category": "Supreme",
+      "ingredients": "Soppressata Salami, Fontina Cheese, Mozzarella Cheese, Mushrooms, Garlic"
+    },
+    {
+      "pizza_id": "soppressata_l",
+      "pizza_type_id": "soppressata",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Soppressata Pizza",
+      "category": "Supreme",
+      "ingredients": "Soppressata Salami, Fontina Cheese, Mozzarella Cheese, Mushrooms, Garlic"
+    },
+    {
+      "pizza_id": "spicy_ital_s",
+      "pizza_type_id": "spicy_ital",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Spicy Italian Pizza",
+      "category": "Supreme",
+      "ingredients": "Capocollo, Tomatoes, Goat Cheese, Artichokes, Peperoncini verdi, Garlic"
+    },
+    {
+      "pizza_id": "spicy_ital_m",
+      "pizza_type_id": "spicy_ital",
+      "size": "M",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Spicy Italian Pizza",
+      "category": "Supreme",
+      "ingredients": "Capocollo, Tomatoes, Goat Cheese, Artichokes, Peperoncini verdi, Garlic"
+    },
+    {
+      "pizza_id": "spicy_ital_l",
+      "pizza_type_id": "spicy_ital",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Spicy Italian Pizza",
+      "category": "Supreme",
+      "ingredients": "Capocollo, Tomatoes, Goat Cheese, Artichokes, Peperoncini verdi, Garlic"
+    },
+    {
+      "pizza_id": "spinach_supr_s",
+      "pizza_type_id": "spinach_supr",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Spinach Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Spinach, Red Onions, Pepperoni, Tomatoes, Artichokes, Kalamata Olives, Garlic, Asiago Cheese"
+    },
+    {
+      "pizza_id": "spinach_supr_m",
+      "pizza_type_id": "spinach_supr",
+      "size": "M",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Spinach Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Spinach, Red Onions, Pepperoni, Tomatoes, Artichokes, Kalamata Olives, Garlic, Asiago Cheese"
+    },
+    {
+      "pizza_id": "spinach_supr_l",
+      "pizza_type_id": "spinach_supr",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Spinach Supreme Pizza",
+      "category": "Supreme",
+      "ingredients": "Spinach, Red Onions, Pepperoni, Tomatoes, Artichokes, Kalamata Olives, Garlic, Asiago Cheese"
+    },
+    {
+      "pizza_id": "five_cheese_s",
+      "pizza_type_id": "five_cheese",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Five Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Mozzarella Cheese, Provolone Cheese, Smoked Gouda Cheese, Romano Cheese, Blue Cheese, Garlic"
+    },
+    {
+      "pizza_id": "five_cheese_m",
+      "pizza_type_id": "five_cheese",
+      "size": "M",
+      "raw_price": 155,
+      "price": 1.55,
+      "name": "The Five Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Mozzarella Cheese, Provolone Cheese, Smoked Gouda Cheese, Romano Cheese, Blue Cheese, Garlic"
+    },
+    {
+      "pizza_id": "five_cheese_l",
+      "pizza_type_id": "five_cheese",
+      "size": "L",
+      "raw_price": 185,
+      "price": 1.85,
+      "name": "The Five Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Mozzarella Cheese, Provolone Cheese, Smoked Gouda Cheese, Romano Cheese, Blue Cheese, Garlic"
+    },
+    {
+      "pizza_id": "four_cheese_s",
+      "pizza_type_id": "four_cheese",
+      "size": "S",
+      "raw_price": 1175,
+      "price": 11.75,
+      "name": "The Four Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Ricotta Cheese, Gorgonzola Piccante Cheese, Mozzarella Cheese, Parmigiano Reggiano Cheese, Garlic"
+    },
+    {
+      "pizza_id": "four_cheese_m",
+      "pizza_type_id": "four_cheese",
+      "size": "M",
+      "raw_price": 1475,
+      "price": 14.75,
+      "name": "The Four Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Ricotta Cheese, Gorgonzola Piccante Cheese, Mozzarella Cheese, Parmigiano Reggiano Cheese, Garlic"
+    },
+    {
+      "pizza_id": "four_cheese_l",
+      "pizza_type_id": "four_cheese",
+      "size": "L",
+      "raw_price": 1795,
+      "price": 17.95,
+      "name": "The Four Cheese Pizza",
+      "category": "Veggie",
+      "ingredients": "Ricotta Cheese, Gorgonzola Piccante Cheese, Mozzarella Cheese, Parmigiano Reggiano Cheese, Garlic"
+    },
+    {
+      "pizza_id": "green_garden_s",
+      "pizza_type_id": "green_garden",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Green Garden Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Tomatoes, Green Olives, Feta Cheese"
+    },
+    {
+      "pizza_id": "green_garden_m",
+      "pizza_type_id": "green_garden",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Green Garden Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Tomatoes, Green Olives, Feta Cheese"
+    },
+    {
+      "pizza_id": "green_garden_l",
+      "pizza_type_id": "green_garden",
+      "size": "L",
+      "raw_price": 2025,
+      "price": 20.25,
+      "name": "The Green Garden Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Tomatoes, Green Olives, Feta Cheese"
+    },
+    {
+      "pizza_id": "ital_veggie_s",
+      "pizza_type_id": "ital_veggie",
+      "size": "S",
+      "raw_price": 1275,
+      "price": 12.75,
+      "name": "The Italian Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Eggplant, Artichokes, Tomatoes, Zucchini, Red Peppers, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "ital_veggie_m",
+      "pizza_type_id": "ital_veggie",
+      "size": "M",
+      "raw_price": 1675,
+      "price": 16.75,
+      "name": "The Italian Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Eggplant, Artichokes, Tomatoes, Zucchini, Red Peppers, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "ital_veggie_l",
+      "pizza_type_id": "ital_veggie",
+      "size": "L",
+      "raw_price": 21,
+      "price": 21.0,
+      "name": "The Italian Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Eggplant, Artichokes, Tomatoes, Zucchini, Red Peppers, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "mediterraneo_s",
+      "pizza_type_id": "mediterraneo",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Mediterranean Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Kalamata Olives, Sun-dried Tomatoes, Feta Cheese, Plum Tomatoes, Red Onions"
+    },
+    {
+      "pizza_id": "mediterraneo_m",
+      "pizza_type_id": "mediterraneo",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Mediterranean Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Kalamata Olives, Sun-dried Tomatoes, Feta Cheese, Plum Tomatoes, Red Onions"
+    },
+    {
+      "pizza_id": "mediterraneo_l",
+      "pizza_type_id": "mediterraneo",
+      "size": "L",
+      "raw_price": 2025,
+      "price": 20.25,
+      "name": "The Mediterranean Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Kalamata Olives, Sun-dried Tomatoes, Feta Cheese, Plum Tomatoes, Red Onions"
+    },
+    {
+      "pizza_id": "mexicana_s",
+      "pizza_type_id": "mexicana",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Mexicana Pizza",
+      "category": "Veggie",
+      "ingredients": "Tomatoes, Red Peppers, Jalapeno Peppers, Red Onions, Cilantro, Corn, Chipotle Sauce, Garlic"
+    },
+    {
+      "pizza_id": "mexicana_m",
+      "pizza_type_id": "mexicana",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Mexicana Pizza",
+      "category": "Veggie",
+      "ingredients": "Tomatoes, Red Peppers, Jalapeno Peppers, Red Onions, Cilantro, Corn, Chipotle Sauce, Garlic"
+    },
+    {
+      "pizza_id": "mexicana_l",
+      "pizza_type_id": "mexicana",
+      "size": "L",
+      "raw_price": 2025,
+      "price": 20.25,
+      "name": "The Mexicana Pizza",
+      "category": "Veggie",
+      "ingredients": "Tomatoes, Red Peppers, Jalapeno Peppers, Red Onions, Cilantro, Corn, Chipotle Sauce, Garlic"
+    },
+    {
+      "pizza_id": "spin_pesto_s",
+      "pizza_type_id": "spin_pesto",
+      "size": "S",
+      "raw_price": 125,
+      "price": 1.25,
+      "name": "The Spinach Pesto Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Tomatoes, Sun-dried Tomatoes, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "spin_pesto_m",
+      "pizza_type_id": "spin_pesto",
+      "size": "M",
+      "raw_price": 165,
+      "price": 1.65,
+      "name": "The Spinach Pesto Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Tomatoes, Sun-dried Tomatoes, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "spin_pesto_l",
+      "pizza_type_id": "spin_pesto",
+      "size": "L",
+      "raw_price": 2075,
+      "price": 20.75,
+      "name": "The Spinach Pesto Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Artichokes, Tomatoes, Sun-dried Tomatoes, Garlic, Pesto Sauce"
+    },
+    {
+      "pizza_id": "spinach_fet_s",
+      "pizza_type_id": "spinach_fet",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Spinach and Feta Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Red Onions, Feta Cheese, Garlic"
+    },
+    {
+      "pizza_id": "spinach_fet_m",
+      "pizza_type_id": "spinach_fet",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Spinach and Feta Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Red Onions, Feta Cheese, Garlic"
+    },
+    {
+      "pizza_id": "spinach_fet_l",
+      "pizza_type_id": "spinach_fet",
+      "size": "L",
+      "raw_price": 2025,
+      "price": 20.25,
+      "name": "The Spinach and Feta Pizza",
+      "category": "Veggie",
+      "ingredients": "Spinach, Mushrooms, Red Onions, Feta Cheese, Garlic"
+    },
+    {
+      "pizza_id": "veggie_veg_s",
+      "pizza_type_id": "veggie_veg",
+      "size": "S",
+      "raw_price": 12,
+      "price": 12.0,
+      "name": "The Vegetables + Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Mushrooms, Tomatoes, Red Peppers, Green Peppers, Red Onions, Zucchini, Spinach, Garlic"
+    },
+    {
+      "pizza_id": "veggie_veg_m",
+      "pizza_type_id": "veggie_veg",
+      "size": "M",
+      "raw_price": 16,
+      "price": 16.0,
+      "name": "The Vegetables + Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Mushrooms, Tomatoes, Red Peppers, Green Peppers, Red Onions, Zucchini, Spinach, Garlic"
+    },
+    {
+      "pizza_id": "veggie_veg_l",
+      "pizza_type_id": "veggie_veg",
+      "size": "L",
+      "raw_price": 2025,
+      "price": 20.25,
+      "name": "The Vegetables + Vegetables Pizza",
+      "category": "Veggie",
+      "ingredients": "Mushrooms, Tomatoes, Red Peppers, Green Peppers, Red Onions, Zucchini, Spinach, Garlic"
+    }
+  ],
+  "analytics": {
+    "byCity": {
+      "Chicago": {
+        "orders": 13987,
+        "qty": 14268,
+        "revenue": 178939.85
+      },
+      "Houston": {
+        "orders": 14478,
+        "qty": 14799,
+        "revenue": 185622.65
+      },
+      "New York": {
+        "orders": 14370,
+        "qty": 14614,
+        "revenue": 184503.5
+      },
+      "Los Angeles": {
+        "orders": 14029,
+        "qty": 14296,
+        "revenue": 180944.8
+      }
+    },
+    "byChannel": {
+      "Domicilio": {
+        "orders": 22640,
+        "qty": 23063,
+        "revenue": 291249.95
+      },
+      "Recogida": {
+        "orders": 11292,
+        "qty": 11505,
+        "revenue": 145722.3
+      },
+      "Salon": {
+        "orders": 22932,
+        "qty": 23409,
+        "revenue": 293038.55
+      }
+    },
+    "byCategory": {
+      "Classic": {
+        "qty": 17391,
+        "revenue": 145955.85
+      },
+      "Veggie": {
+        "qty": 13687,
+        "revenue": 189314.9
+      },
+      "Supreme": {
+        "qty": 13978,
+        "revenue": 165897.3
+      },
+      "Chicken": {
+        "qty": 12921,
+        "revenue": 228842.75
+      }
+    },
+    "bySize": {
+      "M": {
+        "qty": 18210,
+        "revenue": 217023.25
+      },
+      "L": {
+        "qty": 22236,
+        "revenue": 345201.9
+      },
+      "S": {
+        "qty": 16869,
+        "revenue": 165028.75
+      },
+      "XL": {
+        "qty": 630,
+        "revenue": 1606.5
+      },
+      "XXL": {
+        "qty": 32,
+        "revenue": 1150.4
+      }
+    },
+    "topPizzas": [
+      {
+        "pizza_id": "thai_ckn_l",
+        "name": "The Thai Chicken Pizza",
+        "size": "L",
+        "qty": 1634,
+        "revenue": 33905.5
+      },
+      {
+        "pizza_id": "four_cheese_l",
+        "name": "The Four Cheese Pizza",
+        "size": "L",
+        "qty": 1547,
+        "revenue": 27768.65
+      },
+      {
+        "pizza_id": "spicy_ital_l",
+        "name": "The Spicy Italian Pizza",
+        "size": "L",
+        "qty": 1316,
+        "revenue": 27307.0
+      },
+      {
+        "pizza_id": "big_meat_s",
+        "name": "The Big Meat Pizza",
+        "size": "S",
+        "qty": 2241,
+        "revenue": 26892.0
+      },
+      {
+        "pizza_id": "southw_ckn_l",
+        "name": "The Southwest Chicken Pizza",
+        "size": "L",
+        "qty": 1187,
+        "revenue": 24630.25
+      },
+      {
+        "pizza_id": "bbq_ckn_l",
+        "name": "The Barbecue Chicken Pizza",
+        "size": "L",
+        "qty": 1145,
+        "revenue": 23758.75
+      },
+      {
+        "pizza_id": "cali_ckn_l",
+        "name": "The California Chicken Pizza",
+        "size": "L",
+        "qty": 1087,
+        "revenue": 22555.25
+      },
+      {
+        "pizza_id": "classic_dlx_m",
+        "name": "The Classic Deluxe Pizza",
+        "size": "M",
+        "qty": 1382,
+        "revenue": 22112.0
+      },
+      {
+        "pizza_id": "mexicana_l",
+        "name": "The Mexicana Pizza",
+        "size": "L",
+        "qty": 1028,
+        "revenue": 20817.0
+      },
+      {
+        "pizza_id": "bbq_ckn_m",
+        "name": "The Barbecue Chicken Pizza",
+        "size": "M",
+        "qty": 1119,
+        "revenue": 18743.25
+      },
+      {
+        "pizza_id": "cali_ckn_m",
+        "name": "The California Chicken Pizza",
+        "size": "M",
+        "qty": 1101,
+        "revenue": 18441.75
+      },
+      {
+        "pizza_id": "ital_supr_l",
+        "name": "The Italian Supreme Pizza",
+        "size": "L",
+        "qty": 885,
+        "revenue": 18363.75
+      },
+      {
+        "pizza_id": "peppr_salami_l",
+        "name": "The Pepper Salami Pizza",
+        "size": "L",
+        "qty": 816,
+        "revenue": 16932.0
+      },
+      {
+        "pizza_id": "sicilian_l",
+        "name": "The Sicilian Pizza",
+        "size": "L",
+        "qty": 715,
+        "revenue": 14478.75
+      },
+      {
+        "pizza_id": "ckn_alfredo_m",
+        "name": "The Chicken Alfredo Pizza",
+        "size": "M",
+        "qty": 810,
+        "revenue": 13567.5
+      }
+    ],
+    "bottomPizzas": [
+      {
+        "pizza_id": "ital_supr_s",
+        "name": "The Italian Supreme Pizza",
+        "size": "S",
+        "qty": 230,
+        "revenue": 287.5
+      },
+      {
+        "pizza_id": "soppressata_s",
+        "name": "The Soppressata Pizza",
+        "size": "S",
+        "qty": 339,
+        "revenue": 423.75
+      },
+      {
+        "pizza_id": "peppr_salami_s",
+        "name": "The Pepper Salami Pizza",
+        "size": "S",
+        "qty": 370,
+        "revenue": 462.5
+      },
+      {
+        "pizza_id": "soppressata_m",
+        "name": "The Soppressata Pizza",
+        "size": "M",
+        "qty": 311,
+        "revenue": 513.15
+      },
+      {
+        "pizza_id": "spinach_supr_m",
+        "name": "The Spinach Supreme Pizza",
+        "size": "M",
+        "qty": 315,
+        "revenue": 519.75
+      },
+      {
+        "pizza_id": "spin_pesto_m",
+        "name": "The Spinach Pesto Pizza",
+        "size": "M",
+        "qty": 333,
+        "revenue": 549.45
+      },
+      {
+        "pizza_id": "spicy_ital_s",
+        "name": "The Spicy Italian Pizza",
+        "size": "S",
+        "qty": 463,
+        "revenue": 578.75
+      },
+      {
+        "pizza_id": "spinach_supr_s",
+        "name": "The Spinach Supreme Pizza",
+        "size": "S",
+        "qty": 471,
+        "revenue": 588.75
+      },
+      {
+        "pizza_id": "spin_pesto_s",
+        "name": "The Spinach Pesto Pizza",
+        "size": "S",
+        "qty": 477,
+        "revenue": 596.25
+      },
+      {
+        "pizza_id": "the_greek_l",
+        "name": "The Greek Pizza",
+        "size": "L",
+        "qty": 296,
+        "revenue": 606.8
+      }
+    ]
+  },
+  "recentOrders": [
+    {
+      "order_id": 24957,
+      "date": 45657,
+      "time": "7:00:57 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 3,
+      "channel_name": "Salon",
+      "quantity": 1,
+      "pizza_id": "ital_veggie_s",
+      "pizza_name": "The Italian Vegetables Pizza",
+      "size": "S",
+      "unit_price": 12.75,
+      "total_price": 12.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24956,
+      "date": 45657,
+      "time": "8:20:18 p. m.",
+      "city_id": 4,
+      "city_name": "New York",
+      "salechannel_id": 3,
+      "channel_name": "Salon",
+      "quantity": 1,
+      "pizza_id": "ckn_pesto_m",
+      "pizza_name": "The Chicken Pesto Pizza",
+      "size": "M",
+      "unit_price": 16.75,
+      "total_price": 16.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24955,
+      "date": 45657,
+      "time": "7:36:37 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "the_greek_s",
+      "pizza_name": "The Greek Pizza",
+      "size": "S",
+      "unit_price": 12.0,
+      "total_price": 12.0,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24955,
+      "date": 45657,
+      "time": "7:36:37 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "ital_cpcllo_s",
+      "pizza_name": "The Italian Capocollo Pizza",
+      "size": "S",
+      "unit_price": 12.0,
+      "total_price": 12.0,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24955,
+      "date": 45657,
+      "time": "7:36:37 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "classic_dlx_m",
+      "pizza_name": "The Classic Deluxe Pizza",
+      "size": "M",
+      "unit_price": 16.0,
+      "total_price": 16.0,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24954,
+      "date": 45657,
+      "time": "10:45:43 p. m.",
+      "city_id": 4,
+      "city_name": "New York",
+      "salechannel_id": 3,
+      "channel_name": "Salon",
+      "quantity": 1,
+      "pizza_id": "pep_msh_pep_m",
+      "pizza_name": "The Pepperoni, Mushroom, and Peppers Pizza",
+      "size": "M",
+      "unit_price": 1.45,
+      "total_price": 1.45,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24954,
+      "date": 45657,
+      "time": "10:45:43 p. m.",
+      "city_id": 4,
+      "city_name": "New York",
+      "salechannel_id": 3,
+      "channel_name": "Salon",
+      "quantity": 1,
+      "pizza_id": "classic_dlx_l",
+      "pizza_name": "The Classic Deluxe Pizza",
+      "size": "L",
+      "unit_price": 2.05,
+      "total_price": 2.05,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24953,
+      "date": 45657,
+      "time": "11:39:26 a. m.",
+      "city_id": 4,
+      "city_name": "New York",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "hawaiian_s",
+      "pizza_name": "The Hawaiian Pizza",
+      "size": "S",
+      "unit_price": 1.05,
+      "total_price": 1.05,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24952,
+      "date": 45657,
+      "time": "12:27:14 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "spicy_ital_l",
+      "pizza_name": "The Spicy Italian Pizza",
+      "size": "L",
+      "unit_price": 20.75,
+      "total_price": 20.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24952,
+      "date": 45657,
+      "time": "12:27:14 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "napolitana_l",
+      "pizza_name": "The Napolitana Pizza",
+      "size": "L",
+      "unit_price": 2.05,
+      "total_price": 2.05,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24952,
+      "date": 45657,
+      "time": "12:27:14 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "cali_ckn_l",
+      "pizza_name": "The California Chicken Pizza",
+      "size": "L",
+      "unit_price": 20.75,
+      "total_price": 20.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24952,
+      "date": 45657,
+      "time": "12:27:14 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "bbq_ckn_l",
+      "pizza_name": "The Barbecue Chicken Pizza",
+      "size": "L",
+      "unit_price": 20.75,
+      "total_price": 20.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24951,
+      "date": 45657,
+      "time": "4:00:44 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 3,
+      "channel_name": "Salon",
+      "quantity": 1,
+      "pizza_id": "the_greek_xl",
+      "pizza_name": "The Greek Pizza",
+      "size": "XL",
+      "unit_price": 2.55,
+      "total_price": 2.55,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24950,
+      "date": 45657,
+      "time": "8:31:14 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "spinach_fet_m",
+      "pizza_name": "The Spinach and Feta Pizza",
+      "size": "M",
+      "unit_price": 16.0,
+      "total_price": 16.0,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24950,
+      "date": 45657,
+      "time": "8:31:14 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "prsc_argla_s",
+      "pizza_name": "The Prosciutto and Arugula Pizza",
+      "size": "S",
+      "unit_price": 1.25,
+      "total_price": 1.25,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24950,
+      "date": 45657,
+      "time": "8:31:14 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "hawaiian_m",
+      "pizza_name": "The Hawaiian Pizza",
+      "size": "M",
+      "unit_price": 13.25,
+      "total_price": 13.25,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24949,
+      "date": 45657,
+      "time": "3:10:08 p. m.",
+      "city_id": 4,
+      "city_name": "New York",
+      "salechannel_id": 3,
+      "channel_name": "Salon",
+      "quantity": 1,
+      "pizza_id": "four_cheese_l",
+      "pizza_name": "The Four Cheese Pizza",
+      "size": "L",
+      "unit_price": 17.95,
+      "total_price": 17.95,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24948,
+      "date": 45657,
+      "time": "4:53:36 p. m.",
+      "city_id": 2,
+      "city_name": "Houston",
+      "salechannel_id": 3,
+      "channel_name": "Salon",
+      "quantity": 1,
+      "pizza_id": "soppressata_s",
+      "pizza_name": "The Soppressata Pizza",
+      "size": "S",
+      "unit_price": 1.25,
+      "total_price": 1.25,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24947,
+      "date": 45657,
+      "time": "4:54:38 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "the_greek_xl",
+      "pizza_name": "The Greek Pizza",
+      "size": "XL",
+      "unit_price": 2.55,
+      "total_price": 2.55,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24946,
+      "date": 45656,
+      "time": "4:42:36 p. m.",
+      "city_id": 3,
+      "city_name": "Los Angeles",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "spin_pesto_l",
+      "pizza_name": "The Spinach Pesto Pizza",
+      "size": "L",
+      "unit_price": 20.75,
+      "total_price": 20.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24946,
+      "date": 45656,
+      "time": "4:42:36 p. m.",
+      "city_id": 3,
+      "city_name": "Los Angeles",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "spicy_ital_l",
+      "pizza_name": "The Spicy Italian Pizza",
+      "size": "L",
+      "unit_price": 20.75,
+      "total_price": 20.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24946,
+      "date": 45656,
+      "time": "4:42:36 p. m.",
+      "city_id": 3,
+      "city_name": "Los Angeles",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "prsc_argla_l",
+      "pizza_name": "The Prosciutto and Arugula Pizza",
+      "size": "L",
+      "unit_price": 20.75,
+      "total_price": 20.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24946,
+      "date": 45656,
+      "time": "4:42:36 p. m.",
+      "city_id": 3,
+      "city_name": "Los Angeles",
+      "salechannel_id": 2,
+      "channel_name": "Recogida",
+      "quantity": 1,
+      "pizza_id": "pepperoni_s",
+      "pizza_name": "The Pepperoni Pizza",
+      "size": "S",
+      "unit_price": 9.75,
+      "total_price": 9.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24945,
+      "date": 45656,
+      "time": "9:16:17 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "spicy_ital_l",
+      "pizza_name": "The Spicy Italian Pizza",
+      "size": "L",
+      "unit_price": 20.75,
+      "total_price": 20.75,
+      "source": "excel_historico"
+    },
+    {
+      "order_id": 24945,
+      "date": 45656,
+      "time": "9:16:17 p. m.",
+      "city_id": 1,
+      "city_name": "Chicago",
+      "salechannel_id": 1,
+      "channel_name": "Domicilio",
+      "quantity": 1,
+      "pizza_id": "pep_msh_pep_l",
+      "pizza_name": "The Pepperoni, Mushroom, and Peppers Pizza",
+      "size": "L",
+      "unit_price": 1.75,
+      "total_price": 1.75,
+      "source": "excel_historico"
+    }
+  ]
+}

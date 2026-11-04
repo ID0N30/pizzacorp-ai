@@ -1,0 +1,261 @@
+import { FactVentaRow } from '../types';
+
+export interface BICopilotContext {
+  totalHistoricalRows: number;
+  totalRevenue: number;
+  totalQuantity: number;
+  liveOrdersCount: number;
+  liveRevenue: number;
+  byCity: Record<string, { orders: number; qty: number; revenue: number }>;
+  byChannel: Record<string, { orders: number; qty: number; revenue: number }>;
+  byCategory: Record<string, { qty: number; revenue: number }>;
+  bySize: Record<string, { qty: number; revenue: number }>;
+  topPizzas: Array<{ pizza_id: string; name: string; size: string; qty: number; revenue: number }>;
+  bottomPizzas: Array<{ pizza_id: string; name: string; size: string; qty: number; revenue: number }>;
+  recentLiveRows: FactVentaRow[];
+}
+
+export interface BICopilotResponse {
+  userQuestion: string;
+  answer: string;
+  spokenSummary: string;
+}
+
+function buildContextSummaryText(ctx: BICopilotContext): string {
+  return `- Total filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalHistoricalRows.toLocaleString()} históricas + ${ctx.liveOrdersCount} nuevas hoy)
+- Ingresos Totales Acumulados: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD (Nuevas hoy: $${ctx.liveRevenue.toFixed(2)} USD)
+- Total Unidades Vendidas: ${ctx.totalQuantity.toLocaleString()} pizzas
+- Ticket Promedio por Transacción: $${(ctx.totalRevenue / Math.max(1, ctx.totalHistoricalRows + ctx.liveOrdersCount)).toFixed(2)} USD
+- Ventas por Ciudad (dim_city): ${JSON.stringify(ctx.byCity)}
+- Ventas por Canal (dim_saleChannel): ${JSON.stringify(ctx.byChannel)}
+- Ventas por Categoría (dim_pizaTipeID): ${JSON.stringify(ctx.byCategory)}
+- Ventas por Tamaño (dim_pizzas): ${JSON.stringify(ctx.bySize)}
+- Top 5 Pizzas Más Vendidas: ${JSON.stringify(ctx.topPizzas.slice(0, 5))}
+- Top 5 Pizzas Menos Vendidas: ${JSON.stringify(ctx.bottomPizzas.slice(0, 5))}`;
+}
+
+export function buildLocalFallbackAnswer(question: string, ctx: BICopilotContext): { answer: string; spokenSummary: string } {
+  const q = question
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  const citiesSorted = Object.entries(ctx.byCity).sort((a, b) => b[1].revenue - a[1].revenue);
+  const channelsSorted = Object.entries(ctx.byChannel).sort((a, b) => b[1].revenue - a[1].revenue);
+  const categoriesSorted = Object.entries(ctx.byCategory).sort((a, b) => b[1].revenue - a[1].revenue);
+  const sizesSorted = Object.entries(ctx.bySize).sort((a, b) => b[1].revenue - a[1].revenue);
+
+  const topCity = citiesSorted[0];
+  const lowCity = citiesSorted[citiesSorted.length - 1];
+  const topChannel = channelsSorted[0];
+  const topPizza = ctx.topPizzas[0];
+  const worstPizza = ctx.bottomPizzas[0];
+
+  if (q.includes('ciudad') || q.includes('chicago') || q.includes('houston') || q.includes('angeles') || q.includes('york') || q.includes('sede') || q.includes('donde')) {
+    const breakdown = citiesSorted
+      .map(
+        ([name, v], i) =>
+          `${i + 1}. ${name}: $${v.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} (${v.orders.toLocaleString()} órdenes / ${v.qty.toLocaleString()} uds)`
+      )
+      .join('\n');
+    return {
+      answer: `Análisis por Ciudad (dim_city × fact_ventas):\n${breakdown}\n\nRecomendación: ${topCity[0]} lidera las ventas con $${topCity[1].revenue.toLocaleString('en-US')}, mientras que ${lowCity[0]} tiene oportunidad de crecimiento en canal Domicilio.`,
+      spokenSummary: `La ciudad que más vende es ${topCity[0]} con ${Math.round(topCity[1].revenue).toLocaleString('es-CO')} dólares, seguida por ${citiesSorted[1][0]}.`
+    };
+  }
+
+  if (q.includes('canal') || q.includes('domicilio') || q.includes('salon') || q.includes('recogida')) {
+    const breakdown = channelsSorted
+      .map(
+        ([name, v], i) =>
+          `${i + 1}. ${name}: $${v.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} (${v.orders.toLocaleString()} órdenes — ${((v.revenue / ctx.totalRevenue) * 100).toFixed(1)}%)`
+      )
+      .join('\n');
+    return {
+      answer: `Rendimiento por Canal de Venta (dim_saleChannel):\n${breakdown}\n\nRecomendación: El canal ${topChannel[0]} concentra la mayor facturación con el ${((topChannel[1].revenue / ctx.totalRevenue) * 100).toFixed(1)}% del total.`,
+      spokenSummary: `El canal líder es ${topChannel[0]} con ${Math.round(topChannel[1].revenue).toLocaleString('es-CO')} dólares, representando el ${((topChannel[1].revenue / ctx.totalRevenue) * 100).toFixed(0)} por ciento de las ventas.`
+    };
+  }
+
+  if (q.includes('peor') || q.includes('menos') || q.includes('baja') || q.includes('eliminar')) {
+    const bottomList = ctx.bottomPizzas
+      .slice(0, 5)
+      .map((p, i) => `${i + 1}. ${p.name} [${p.pizza_id}] (${p.size}): $${p.revenue.toLocaleString('en-US')} (${p.qty} uds)`)
+      .join('\n');
+    return {
+      answer: `Top 5 Pizzas con Menor Rotación:\n${bottomList}\n\nRecomendación: "${worstPizza.name}" (${worstPizza.pizza_id}) registra solo $${worstPizza.revenue.toLocaleString('en-US')} en ventas. Se recomienda incluirla en combos promocionales.`,
+      spokenSummary: `La pizza con menor rotación es ${worstPizza.name} tamaño ${worstPizza.size}, con solo ${worstPizza.qty} unidades vendidas.`
+    };
+  }
+
+  if (q.includes('mejor') || q.includes('mas vendida') || q.includes('top') || q.includes('estrella') || q.includes('pizza')) {
+    const topList = ctx.topPizzas
+      .slice(0, 5)
+      .map((p, i) => `${i + 1}. ${p.name} [${p.pizza_id}] (Tamaño ${p.size}): $${p.revenue.toLocaleString('en-US')} (${p.qty} uds)`)
+      .join('\n');
+    return {
+      answer: `Top 5 Pizzas Más Vendidas del Modelo:\n${topList}\n\nRecomendación: "${topPizza.name}" (${topPizza.pizza_id}) lidera con $${topPizza.revenue.toLocaleString('en-US')} y ${topPizza.qty} unidades.`,
+      spokenSummary: `La pizza más rentable es ${topPizza.name} en tamaño ${topPizza.size}, generando ${Math.round(topPizza.revenue).toLocaleString('es-CO')} dólares.`
+    };
+  }
+
+  if (q.includes('tamano') || q.includes('size') || q.includes('grande') || q.includes('mediana') || q.includes('categoria')) {
+    const sizeText = sizesSorted
+      .map(([s, v]) => `Tamaño ${s}: $${v.revenue.toLocaleString('en-US')} (${v.qty.toLocaleString()} uds)`)
+      .join('\n• ');
+    const catText = categoriesSorted
+      .map(([c, v]) => `${c}: $${v.revenue.toLocaleString('en-US')} (${v.qty.toLocaleString()} uds)`)
+      .join('\n• ');
+    return {
+      answer: `Distribución por Tamaño y Categoría:\n• ${sizeText}\n\nPor Categoría:\n• ${catText}`,
+      spokenSummary: `La categoría líder es ${categoriesSorted[0][0]} y el tamaño más vendido es el ${sizesSorted[0][0]}.`
+    };
+  }
+
+  if (q.includes('hoy') || q.includes('vivo') || q.includes('nuev') || q.includes('reciente')) {
+    return {
+      answer: `Operación en Vivo (Sesión Actual):\n• Nuevas filas agregadas a fact_ventas: ${ctx.liveOrdersCount}\n• Ingresos en vivo hoy: $${ctx.liveRevenue.toFixed(2)} USD\n• Total acumulado en el modelo: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} filas.`,
+      spokenSummary: `En esta sesión se han registrado ${ctx.liveOrdersCount} nuevas filas en Excel por un total de ${ctx.liveRevenue.toFixed(0)} dólares.`
+    };
+  }
+
+  return {
+    answer: `Resumen Ejecutivo del Modelo (Excel & Power BI):\n• Ingresos Totales: $${ctx.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD\n• Filas en fact_ventas: ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString()} (${ctx.totalQuantity.toLocaleString()} pizzas)\n• Ciudad Líder: ${topCity[0]} ($${topCity[1].revenue.toLocaleString('en-US')})\n• Canal Principal: ${topChannel[0]} ($${topChannel[1].revenue.toLocaleString('en-US')})\n• Pizza #1: ${topPizza.name} (${topPizza.size}) — $${topPizza.revenue.toLocaleString('en-US')}`,
+    spokenSummary: `El modelo registra ingresos totales por ${Math.round(ctx.totalRevenue).toLocaleString('es-CO')} dólares en ${(ctx.totalHistoricalRows + ctx.liveOrdersCount).toLocaleString('es-CO')} filas, liderado por la ciudad de ${topCity[0]}.`
+  };
+}
+
+export async function askBICopilot(
+  question: string,
+  ctx: BICopilotContext,
+  apiKey?: string
+): Promise<BICopilotResponse> {
+  const cleanKey = apiKey?.trim() || (import.meta as any).env?.VITE_GEMINI_API_KEY?.trim() || '';
+
+  if (cleanKey.length > 15) {
+    const prompt = `Eres el Analista IA de Inteligencia de Negocios de PizzaCorp conectado al Excel y Power BI.
+Datos exactos en tiempo real:
+${buildContextSummaryText(ctx)}
+
+Pregunta del administrador: "${question}"
+
+Devuelve ÚNICAMENTE un JSON válido con esta estructura:
+{
+  "answer": "Respuesta ejecutiva bien formateada con cifras exactas y una recomendación breve.",
+  "spokenSummary": "Resumen hablado natural de máximo 2 oraciones breves en español (sin símbolos ni listas) para leer en voz alta rápidamente."
+}`;
+
+    const verifiedModels = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3-flash-preview'];
+    for (const modelName of verifiedModels) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${cleanKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.2,
+                responseMimeType: 'application/json'
+              }
+            })
+          }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          const parsed = JSON.parse(rawText.replace(/```json|```/g, '').trim());
+          if (parsed.answer) {
+            return {
+              userQuestion: question,
+              answer: String(parsed.answer),
+              spokenSummary: String(parsed.spokenSummary || parsed.answer)
+            };
+          }
+        }
+      } catch {}
+    }
+  }
+
+  const fallback = buildLocalFallbackAnswer(question, ctx);
+  return {
+    userQuestion: question,
+    answer: fallback.answer,
+    spokenSummary: fallback.spokenSummary
+  };
+}
+
+/**
+ * Escucha la pregunta en audio del administrador y responde en UN SOLO paso con gemini-3.5-flash-lite
+ */
+export async function askBICopilotByAudio(
+  base64Audio: string,
+  mimeType: string,
+  ctx: BICopilotContext,
+  apiKey?: string
+): Promise<BICopilotResponse | null> {
+  const cleanKey = apiKey?.trim() || (import.meta as any).env?.VITE_GEMINI_API_KEY?.trim() || '';
+  if (cleanKey.length <= 15) return null;
+
+  const prompt = `Escucha el audio del administrador preguntando sobre el negocio de pizzas y el tablero de Power BI / Excel.
+Si el audio solo tiene silencio o ruido sin palabras, devuelve:
+{"userQuestion": "", "answer": "", "spokenSummary": ""}
+
+Datos exactos del modelo estrella:
+${buildContextSummaryText(ctx)}
+
+Devuelve ÚNICAMENTE un objeto JSON válido con:
+{
+  "userQuestion": "transcripción exacta en español de la pregunta que hizo el usuario",
+  "answer": "respuesta ejecutiva clara con cifras exactas del modelo y recomendación",
+  "spokenSummary": "resumen hablado directo en 1 o 2 frases cortas sin símbolos para decir por voz"
+}`;
+
+  const verifiedModels = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3-flash-preview'];
+  for (const modelName of verifiedModels) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${cleanKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: mimeType || 'audio/webm',
+                      data: base64Audio
+                    }
+                  },
+                  { text: prompt }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              responseMimeType: 'application/json'
+            }
+          })
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+        const parsed = JSON.parse(rawText.replace(/```json|```/g, '').trim());
+        const q = String(parsed.userQuestion || '').trim();
+        if (!q) return null;
+        return {
+          userQuestion: q,
+          answer: String(parsed.answer || buildLocalFallbackAnswer(q, ctx).answer),
+          spokenSummary: String(parsed.spokenSummary || parsed.answer || '')
+        };
+      }
+    } catch {}
+  }
+
+  return null;
+}
